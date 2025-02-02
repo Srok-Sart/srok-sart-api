@@ -3,12 +3,18 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PostsModule } from './posts/posts.module';
 import databaseConfig from 'db.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      load: [databaseConfig],
+      envFilePath: ['.env', `.env.${process.env.NODE_ENV}`],
+      isGlobal: true,
+    }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
