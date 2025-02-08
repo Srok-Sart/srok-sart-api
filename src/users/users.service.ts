@@ -33,7 +33,14 @@ export class UsersService {
   async findOne(id: number): Promise<User> {
     return await this.usersRepo.findOne({
       where: { id },
-      select: ['id', 'email', 'firstName', 'lastName', 'role'],
+      select: [
+        'id',
+        'email',
+        'firstName',
+        'lastName',
+        'hashedRefreshToken',
+        'role',
+      ],
     });
   }
 
@@ -62,9 +69,9 @@ export class UsersService {
     }
   }
 
-  // async updateRefreshToken(id: number, hashedRefreshToken: string) {
-  //   return this.usersRepo.update(id, { hashedRefreshToken });
-  // }
+  async updateRefreshToken(id: number, hashedRefreshToken: string) {
+    return this.usersRepo.update(id, { hashedRefreshToken });
+  }
 
   async remove(id: number): Promise<{ message: string }> {
     const user = await this.findOne(id);
