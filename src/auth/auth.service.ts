@@ -12,6 +12,7 @@ import { AuthJwtPayload } from './types/auth-jwtPayload';
 import * as argon2 from 'argon2';
 import { CurrentUser } from './types/current-user';
 import { omit } from 'lodash';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -91,6 +92,18 @@ export class AuthService {
     const result = omit(user, ['password']);
 
     return result;
+  }
+
+  async validateGoogleUser(googleUser: CreateUserDto) {
+    const user = await this.usersService.findByEmail(googleUser.email);
+
+    if (!user) {
+      const newUser = await this.usersService.create(googleUser);
+
+      return newUser;
+    }
+
+    return user;
   }
 
   async validateRefreshToken(userId: number, refreshToken: string) {

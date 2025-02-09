@@ -14,11 +14,14 @@ import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { RolesGuard } from './guards/roles/roles.guard';
+import googleOauth2Config from './config/google-oauth2.config';
+import { GoogleOauth2Strategy } from './strategies/google-oauth2.strategy';
 
 @Module({
   imports: [
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
+    ConfigModule.forFeature(googleOauth2Config),
     TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -37,6 +40,7 @@ import { RolesGuard } from './guards/roles/roles.guard';
     LocalStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
+    GoogleOauth2Strategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
