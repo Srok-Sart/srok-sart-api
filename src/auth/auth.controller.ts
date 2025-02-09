@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -12,8 +13,8 @@ import { LocalAuthGuard } from './guards/local-auth/local-auth.guard';
 import { AuthJwtPayload } from './types/auth-jwtPayload';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { Public } from './decorators/public.decorator';
-import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { UsersService } from 'src/users/users.service';
+import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -49,10 +50,24 @@ export class AuthController {
     await this.authService.logout(req.user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Req() req) {
     const userId = req.user.id;
     return this.authService.getProfile(userId);
+  }
+
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/login')
+  async googleLogin() {}
+
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleLoginCallback(@Req() req, @Res() res) {
+    const response = await this.authService.login(req.user.id);
+
+    // res.redirect(`${process.env.CLIENT_ORIGIN}?token=${response.accessToken}`);
+    res.redirect(`http://localhost:8000?token=${response.accessToken}`);
   }
 }
