@@ -1,17 +1,10 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
+import { Base } from 'src/core/base.entity';
 
 @Entity('posts')
-export class Post {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Post extends Base {
   @Column()
   title: string;
 
@@ -43,10 +36,4 @@ export class Post {
     nullable: true,
   })
   postDifficulty: PostDifficulty;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @CreateDateColumn()
-  updatedAt: Date;
 }

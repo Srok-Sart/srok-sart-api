@@ -1,0 +1,11 @@
+export enum MaterialCategory {
+  PLASTIC = 'PLASTIC',
+  PAPER = 'PAPER',
+  METAL = 'METAL',
+  GLASS = 'GLASS',
+  TEXTILE = 'TEXTILE',
+  ORGANIC = 'ORGANIC',
+  ELECTRONIC = 'ELECTRONIC',
+  BATTERY = 'BATTERY',
+  OTHER = 'OTHER',
+}
