@@ -8,21 +8,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class PostsService {
   constructor(
-    @InjectRepository(Post) private postsRepository: Repository<Post>,
+    @InjectRepository(Post) private postRepository: Repository<Post>,
   ) {}
 
-  create(createPostDto: CreatePostDto) {
-    const post = this.postsRepository.create(createPostDto);
+  async create(createPostDto: CreatePostDto) {
+    const post = this.postRepository.create(createPostDto);
 
-    return this.postsRepository.save(post);
+    return await this.postRepository.save(post);
   }
 
   async findAll() {
-    return await this.postsRepository.find();
+    return await this.postRepository.find();
   }
 
   async findOne(id: number) {
-    const post = await this.postsRepository.findOne({ where: { id } });
+    const post = await this.postRepository.findOne({ where: { id } });
     if (!post) {
       throw new NotFoundException(`Post with ID a ${id} not found`);
     }
@@ -30,7 +30,7 @@ export class PostsService {
   }
 
   async update(id: number, updatePostDto: UpdatePostDto) {
-    const post = await this.postsRepository.preload({
+    const post = await this.postRepository.preload({
       id,
       ...updatePostDto,
     });
@@ -39,12 +39,12 @@ export class PostsService {
       throw new NotFoundException(`Post #${id} not found`);
     }
 
-    return this.postsRepository.save(post);
+    return this.postRepository.save(post);
   }
 
   async remove(id: number) {
     const post = await this.findOne(id);
 
-    await this.postsRepository.remove(post);
+    await this.postRepository.remove(post);
   }
 }

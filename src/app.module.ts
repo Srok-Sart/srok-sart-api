@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { MaterialsModule } from './materials/materials.module';
 import databaseConfig from 'db.config';
 
 @Module({
@@ -19,6 +20,7 @@ import databaseConfig from 'db.config';
     PostsModule,
     UsersModule,
     AuthModule,
+    MaterialsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
