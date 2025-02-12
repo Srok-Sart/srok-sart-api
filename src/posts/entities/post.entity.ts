@@ -14,6 +14,9 @@ export class Post extends Base {
   @Column({ nullable: true })
   estimatedTime: string;
 
+  @Column('text', { array: true, default: [] })
+  imageUrls: string[];
+
   @Column()
   thumbnailUrl: string;
 
@@ -26,7 +29,7 @@ export class Post extends Base {
   @Column({ default: 0 })
   likeCount: number;
 
-  @Column({ type: 'enum', enum: PostType, default: PostType.YOUTUBE_URL })
+  @Column({ type: 'enum', enum: PostType, default: PostType.IMAGE })
   postType: PostType;
 
   @Column({
