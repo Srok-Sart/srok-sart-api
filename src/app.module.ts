@@ -7,6 +7,7 @@ import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MaterialsModule } from './materials/materials.module';
+import { CommentsModule } from './comments/comments.module';
 import databaseConfig from 'db.config';
 
 @Module({
@@ -21,6 +22,7 @@ import databaseConfig from 'db.config';
     UsersModule,
     AuthModule,
     MaterialsModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
