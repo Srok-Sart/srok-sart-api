@@ -5,21 +5,20 @@ import { Post } from 'src/posts/entities/post.entity';
 
 @Entity('comments')
 export class Comment extends Base {
+  @Column({ type: 'text' })
+  content: string;
 
-    @Column({ type: 'text' })
-    content: string;
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-    @ManyToOne(() => User, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
-    user: User;
+  @Column({ name: 'user_id' })
+  userId: number;
 
-    @Column({ name: 'user_id' })
-    userId: number;
+  @ManyToOne(() => Post, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'post_id' })
+  post: Post;
 
-    @ManyToOne(() => Post, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'post_id' })
-    post: Post;
-
-    @Column({ name: 'post_id' })
-    postId: number;
+  @Column({ name: 'post_id' })
+  postId: number;
 }
