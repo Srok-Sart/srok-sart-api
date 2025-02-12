@@ -36,8 +36,6 @@ export class UsersService {
       select: [
         'id',
         'email',
-        'firstName',
-        'lastName',
         'hashedRefreshToken',
         'role',
       ],
