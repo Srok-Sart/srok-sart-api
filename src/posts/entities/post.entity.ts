@@ -1,8 +1,9 @@
-import { Column, Entity } from 'typeorm';
-import { PostType } from '../enums/post-type.enum';
-import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { Base } from 'src/core/base.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { PostStatus } from '../enums/post-status.enum';
+import { PostType } from '../enums/post-type.enum';
+import { PostMaterial } from './post-material.entity';
 
 @Entity('posts')
 export class Post extends Base {
@@ -48,4 +49,7 @@ export class Post extends Base {
     nullable: true,
   })
   postStatus: PostStatus;
+
+  @OneToMany(() => PostMaterial, (postMaterial) => postMaterial.post)
+  materials: PostMaterial[];
 }
