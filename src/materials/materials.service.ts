@@ -23,7 +23,7 @@ export class MaterialsService {
   }
 
   async findOne(id: number) {
-    const material = await this.materialRepository.findOne({ where: { id } });
+    const material = await this.materialRepository.findOneBy({ id });
 
     if (!material) {
       throw new NotFoundException(`Material with ID ${id} not found`);

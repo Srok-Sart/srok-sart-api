@@ -1,10 +1,11 @@
-import { Column, Entity, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { PostType } from '../enums/post-type.enum';
-import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { Base } from 'src/core/base.entity';
-import { PostStatus } from '../enums/post-status.enum';
-import { PostLike } from './post-like.entity';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { PostDifficulty } from '../enums/post-difficulty.enum';
+import { PostStatus } from '../enums/post-status.enum';
+import { PostType } from '../enums/post-type.enum';
+import { PostCompletion } from './post-completion.entity';
+import { PostLike } from './post-like.entity';
 
 @Entity('posts')
 export class Post extends Base {
@@ -32,10 +33,10 @@ export class Post extends Base {
   @Column({ default: 0 })
   likeCount: number;
 
-  @OneToMany(() => PostLike, like => like.post)
+  @OneToMany(() => PostLike, (like) => like.post)
   likes: PostLike[];
 
-  @ManyToOne(() => User, user => user.posts)
+  @ManyToOne(() => User, (user) => user.posts)
   user: User;
 
   @Column({ type: 'enum', enum: PostType, default: PostType.IMAGE })
@@ -56,4 +57,7 @@ export class Post extends Base {
     nullable: true,
   })
   postStatus: PostStatus;
+
+  @OneToMany(() => PostCompletion, (postCompletion) => postCompletion.post)
+  completions: PostCompletion[];
 }

@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 import { PostLike } from './entities/post-like.entity';
 import { Post } from './entities/post.entity';
-import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class PostLikesService {
@@ -22,22 +26,22 @@ export class PostLikesService {
       relations: ['post'],
     });
 
-    return likes.map(like => like.post.id);
+    return likes.map((like) => like.post.id);
   }
 
   async findOne(postId: number): Promise<Post> {
     const post = await this.postRepository.findOne({ where: { id: postId } });
-    
+
     if (!post) {
       throw new NotFoundException(`Post with ID ${postId} not found`);
     }
-    
+
     return post;
   }
 
   async likePost(postId: number, userId: number) {
     const post = await this.findOne(postId);
-    
+
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);

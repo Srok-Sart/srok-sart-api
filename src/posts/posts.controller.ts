@@ -3,34 +3,44 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
-  UploadedFiles,
-  UseInterceptors,
-  HttpCode,
-  HttpStatus,
+  Req,
   Request,
   UnauthorizedException,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { InjectRepository } from '@nestjs/typeorm';
 import { memoryStorage } from 'multer';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { PostsService } from './posts.service';
-import { PostLikesService } from './posts-like.service';
 import { PostLikeResponseDto } from './dto/post-like-response.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { PostCompletion } from './entities/post-completion.entity';
+import { PostCompletionService } from './post-completion.service';
+import { PostLikesService } from './posts-like.service';
+import { PostsService } from './posts.service';
+import { Repository } from 'typeorm';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private readonly postsService: PostsService,
     private readonly postLikesService: PostLikesService,
+    private readonly postCompletionService: PostCompletionService,
+    // @InjectRepository(PostCompletion)
+    // private postCompletionRepository: Repository<PostCompletion>,
   ) {}
-  
+
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -50,11 +60,13 @@ export class PostsController {
     @Request() req,
   ) {
     const userId = req.user?.id;
-    
+
     if (!userId) {
-      throw new UnauthorizedException('User must be authenticated to create posts');
+      throw new UnauthorizedException(
+        'User must be authenticated to create posts',
+      );
     }
-    
+
     return this.postsService.create(createPostDto, files, userId);
   }
 
@@ -81,7 +93,7 @@ export class PostsController {
       limit: limitNumber,
     });
   }
-  
+
   // Post like related endpoints - now using PostLikesService
   @Get('liked')
   async getLikedPosts(@Request() req) {
@@ -128,8 +140,8 @@ export class PostsController {
   @Post(':id/like')
   @HttpCode(HttpStatus.OK)
   async likePost(
-    @Param('id', ParseIntPipe) id: number, 
-    @Request() req
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
   ): Promise<PostLikeResponseDto> {
     return this.postLikesService.likePost(id, req.user.id);
   }
@@ -137,15 +149,46 @@ export class PostsController {
   @Delete(':id/like')
   @HttpCode(HttpStatus.OK)
   async unlikePost(
-    @Param('id', ParseIntPipe) id: number, 
-    @Request() req
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
   ): Promise<PostLikeResponseDto> {
     return this.postLikesService.unlikePost(id, req.user.id);
   }
 
   @Get(':id/liked')
   async checkIfLiked(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    const isLiked = await this.postLikesService.checkIfUserLikedPost(id, req.user.id);
+    const isLiked = await this.postLikesService.checkIfUserLikedPost(
+      id,
+      req.user.id,
+    );
     return { isLiked };
+  }
+
+  @Post(':id/complete')
+  @UseGuards(JwtAuthGuard)
+  async markAsCompleted(@Param('id') id: string, @Req() req: Request) {
+    const userId = req.user['id'];
+    const postId = parseInt(id, 10);
+
+    // Check if user has already completed this post
+    const existingCompletion = await this.postCompletionService.findOne(
+      userId,
+      postId,
+    );
+
+    if (existingCompletion) {
+      return { message: 'You have already completed this post' };
+    }
+
+    // Create completion record
+    await this.postCompletionService.create({
+      userId,
+      postId,
+    });
+
+    // Increment the completion count on the post
+    await this.postsService.markAsCompleted(postId);
+
+    return { message: 'Post marked as completed successfully' };
   }
 }

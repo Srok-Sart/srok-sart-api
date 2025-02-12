@@ -36,25 +36,25 @@ export class PostsService {
     const thumbnailUrl = files.thumbnail?.length
       ? await this.fileUploadService.saveFile(files.thumbnail[0])
       : null;
-  
+
     const imageUrls = files.contents?.length
       ? await this.fileUploadService.saveMultipleFiles(files.contents)
       : [];
-  
+
     // Find user
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
-  
+
     const postData = {
       ...createPostDto,
       thumbnailUrl,
       imageUrls,
-      user, 
-      userId, 
+      user,
+      userId,
     };
-  
+
     const post = this.postRepository.create(postData);
     return await this.postRepository.save(post);
   }
@@ -84,7 +84,7 @@ export class PostsService {
     if (userId) {
       qb.andWhere('post.user = :userId', { userId });
     }
-  
+
     // Dynamic Filtering: expects comma-separated "field:value" pairs.
     if (filter) {
       const allowedFilters = ['postType', 'postDifficulty', 'postStatus'];
@@ -174,5 +174,9 @@ export class PostsService {
     }
 
     return await this.postRepository.remove(post);
+  }
+
+  async markAsCompleted(id: number) {
+    return this.postRepository.increment({ id }, 'completionCount', 1);
   }
 }

@@ -1,15 +1,17 @@
+import * as argon2 from 'argon2';
+import { Exclude } from 'class-transformer';
+import { Role } from 'src/auth/enums/role.enum';
+import { PostCompletion } from 'src/posts/entities/post-completion.entity';
 import {
   BeforeInsert,
   Column,
   Entity,
-  PrimaryGeneratedColumn,
   OneToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
-import * as argon2 from 'argon2';
-import { Role } from 'src/auth/enums/role.enum';
-import { Exclude } from 'class-transformer';
 import { BookmarkCollection } from '../../bookmarks/entities/bookmark-collection.entity';
 import { Post } from '../../posts/entities/post.entity';
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
@@ -44,7 +46,7 @@ export class User {
   @Column({ nullable: true })
   hashedRefreshToken: string;
 
-  @OneToMany(() => Post, post => post.user)
+  @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
 
   @OneToMany(
@@ -53,6 +55,9 @@ export class User {
     { eager: true },
   )
   collections: BookmarkCollection[];
+
+  @OneToMany(() => PostCompletion, (postCompletion) => postCompletion.post)
+  completions: PostCompletion[];
 
   @BeforeInsert()
   async hashPassword() {
