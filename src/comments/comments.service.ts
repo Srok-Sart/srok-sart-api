@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -21,38 +22,31 @@ export class CommentsService {
 
   async create(userId: number, createCommentDto: CreateCommentDto) {
     try {
-      const postId = Number(createCommentDto.postId);
-
-      if (isNaN(postId)) {
-        throw new BadRequestException('Invalid post ID format');
-      }
-
       const post = await this.postRepository.findOne({
-        where: { id: postId },
+        where: { id: createCommentDto.postId },
       });
-
+  
       if (!post) {
-        throw new NotFoundException(`Post with ID ${postId} not found`);
+        throw new NotFoundException(
+          `Post with ID ${createCommentDto.postId} not found`,
+        );
       }
-
+  
       const comment = this.commentRepository.create({
-        ...createCommentDto,
-        userId,
-        postId,
+        ...createCommentDto, 
+        userId, 
       });
-
+  
       return await this.commentRepository.save(comment);
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadRequestException('Failed to create comment');
+      
+      console.error('Error creating comment:', error);
     }
   }
-
+  
   async findAll() {
     try {
       return await this.commentRepository.find({
