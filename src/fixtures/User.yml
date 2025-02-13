@@ -1,0 +1,32 @@
+entity: User
+parameters: {}
+processor: ../dist/processor/userProcessor
+items:
+  user1:
+    firstName: '{{name.firstName}}'
+    lastName: '{{name.lastName}}'
+    email: '{{internet.email}}'
+    __call:
+      setPassword:
+        - foo
+  user2:
+    firstName: '{{name.firstName}}'
+    lastName: '{{name.lastName}}'
+    email: '{{internet.email}}'
+    __call:
+      setPassword:
+        - foo
+  user3:
+    firstName: '{{name.firstName}}'
+    lastName: '{{name.lastName}}'
+    email: '{{internet.email}}'
+    __call:
+      setPassword:
+        - foo
+  user4:
+    firstName: '{{name.firstName}}'
+    lastName: '{{name.lastName}}'
+    email: '{{internet.email}}'
+    __call:
+      setPassword:
+        - foo

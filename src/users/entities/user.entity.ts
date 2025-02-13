@@ -1,6 +1,13 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import * as argon2 from 'argon2';
 import { Role } from 'src/auth/enums/role.enum';
+import { Post } from 'src/posts/entities/post.entity';
 
 @Entity('users')
 export class User {
@@ -33,6 +40,9 @@ export class User {
 
   @Column({ nullable: true })
   hashedRefreshToken: string;
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
 
   @BeforeInsert()
   async hashPassword() {

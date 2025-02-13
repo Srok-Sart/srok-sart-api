@@ -1,7 +1,8 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { Base } from 'src/core/base.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity('posts')
 export class Post extends Base {
@@ -36,4 +37,7 @@ export class Post extends Base {
     nullable: true,
   })
   postDifficulty: PostDifficulty;
+
+  @ManyToOne(() => User, (user) => user.posts)
+  user: User;
 }
