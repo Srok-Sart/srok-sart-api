@@ -30,7 +30,13 @@ export class PostsController {
       { name: 'thumbnail', maxCount: 1 },
     ]),
   )
-  async uploadFiles(@UploadedFiles() files: { images?: Express.Multer.File[]; thumbnail?: Express.Multer.File[] }) {
+  async uploadFiles(
+    @UploadedFiles()
+    files: {
+      images?: Express.Multer.File[];
+      thumbnail?: Express.Multer.File[];
+    },
+  ) {
     return this.postsService.uploadFiles(files);
   }
 
@@ -57,11 +63,13 @@ export class PostsController {
 
   @Public()
   @Get('uploads/:filename')
-  async getUploadedFile(@Param('filename') filename: string, @Res() res: Response) {
+  async getUploadedFile(
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
     return this.postsService.getUploadedFile(filename, res);
   }
 
-  // Update a post, allowing new file uploads
   @Public()
   @Patch(':id')
   @UseInterceptors(
@@ -73,7 +81,11 @@ export class PostsController {
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
-    @UploadedFiles() files?: { images?: Express.Multer.File[]; thumbnail?: Express.Multer.File[] },
+    @UploadedFiles()
+    files?: {
+      images?: Express.Multer.File[];
+      thumbnail?: Express.Multer.File[];
+    },
   ) {
     return this.postsService.update(+id, updatePostDto, files);
   }
