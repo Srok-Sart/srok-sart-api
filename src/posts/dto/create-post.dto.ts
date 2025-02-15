@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsArray,
+} from 'class-validator';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
 
@@ -9,14 +15,20 @@ export class CreatePostDto {
 
   @IsString()
   @IsOptional()
-  description: string;
+  description?: string;
 
   @IsString()
-  estimatedTime: string;
+  @IsOptional()
+  estimatedTime?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  imageUrls?: string[];
 
   @IsString()
-  @IsNotEmpty()
-  thumbnailUrl: string;
+  @IsOptional()
+  thumbnailUrl?: string;
 
   @IsEnum(PostType)
   postType: PostType;
