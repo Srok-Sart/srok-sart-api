@@ -8,7 +8,6 @@ import {
   Delete,
   UseInterceptors,
   UploadedFiles,
-  BadRequestException,
   Res,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -31,32 +30,8 @@ export class PostsController {
       { name: 'thumbnail', maxCount: 1 },
     ]),
   )
-  async uploadFiles(
-    @UploadedFiles()
-    files: {
-      images?: Express.Multer.File[];
-      thumbnail?: Express.Multer.File[];
-    },
-  ) {
-    console.log('Files received (upload endpoint):', files);
-
-    const images = files?.images || [];
-    const thumbnailFiles = files?.thumbnail || [];
-
-    if (images.length === 0 && thumbnailFiles.length === 0) {
-      throw new BadRequestException(
-        'At least one image or thumbnail should be uploaded',
-      );
-    }
-
-    // Extract filenames and generate file URLs
-    const imageUrls = images.map((file) => `/uploads/${file.filename}`);
-    const thumbnailUrl =
-      thumbnailFiles.length > 0
-        ? `/uploads/${thumbnailFiles[0].filename}`
-        : null;
-
-    return { imageUrls, thumbnailUrl };
+  async uploadFiles(@UploadedFiles() files: { images?: Express.Multer.File[]; thumbnail?: Express.Multer.File[] }) {
+    return this.postsService.uploadFiles(files);
   }
 
   // Create a new post (JSON only, images handled via /upload)
@@ -80,14 +55,10 @@ export class PostsController {
     return this.postsService.findOne(+id);
   }
 
-  // Serve uploaded files directly
   @Public()
   @Get('uploads/:filename')
-  async getUploadedFile(
-    @Param('filename') filename: string,
-    @Res() res: Response,
-  ) {
-    return res.sendFile(filename, { root: 'uploads' });
+  async getUploadedFile(@Param('filename') filename: string, @Res() res: Response) {
+    return this.postsService.getUploadedFile(filename, res);
   }
 
   // Update a post, allowing new file uploads
@@ -102,26 +73,9 @@ export class PostsController {
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
-    @UploadedFiles()
-    files?: {
-      images?: Express.Multer.File[];
-      thumbnail?: Express.Multer.File[];
-    },
+    @UploadedFiles() files?: { images?: Express.Multer.File[]; thumbnail?: Express.Multer.File[] },
   ) {
-    if (files) {
-      const images = files.images || [];
-      const thumbnailFiles = files.thumbnail || [];
-
-      if (images.length > 0) {
-        updatePostDto.imageUrls = images.map(
-          (file) => `/uploads/${file.filename}`,
-        );
-      }
-      if (thumbnailFiles.length > 0) {
-        updatePostDto.thumbnailUrl = `/uploads/${thumbnailFiles[0].filename}`;
-      }
-    }
-    return this.postsService.update(+id, updatePostDto);
+    return this.postsService.update(+id, updatePostDto, files);
   }
 
   // Delete a post by ID
