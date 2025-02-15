@@ -8,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { omit } from 'lodash';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +17,8 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const user = this.usersRepo.create(createUserDto);
     try {
-      return await this.usersRepo.save(user);
+      const savedUser = await this.usersRepo.save(user);
+      return omit(savedUser, ['password', 'hashedRefreshToken']) as User;
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to create user. ${error.message}`,
@@ -33,12 +35,7 @@ export class UsersService {
   async findOne(id: number): Promise<User> {
     return await this.usersRepo.findOne({
       where: { id },
-      select: [
-        'id',
-        'email',
-        'hashedRefreshToken',
-        'role',
-      ],
+      select: ['id', 'email', 'hashedRefreshToken', 'role'],
     });
   }
 
