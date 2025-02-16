@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth/local-auth.guard';
-import { AuthJwtPayload } from './types/auth-jwtPayload';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { UsersService } from 'src/users/users.service';
@@ -37,9 +36,7 @@ export class AuthController {
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   async refreshToken(@Request() req) {
-    const refreshToken = await this.authService.refreshToken(
-      req.user as AuthJwtPayload,
-    );
+    const refreshToken = await this.authService.refreshToken(req.user);
 
     return refreshToken;
   }
