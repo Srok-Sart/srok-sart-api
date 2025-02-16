@@ -1,6 +1,7 @@
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import * as argon2 from 'argon2';
 import { Role } from 'src/auth/enums/role.enum';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
 export class User {
@@ -19,8 +20,8 @@ export class User {
   @Column({ unique: true, type: 'varchar', length: 40 })
   email: string;
 
-  @Column()
-  password: string;
+  @Column({ name: 'password' })
+  _password: string;
 
   @Column({ nullable: true })
   profileImageUrl: string;
@@ -31,11 +32,12 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 
+  @Exclude()
   @Column({ nullable: true })
   hashedRefreshToken: string;
 
   @BeforeInsert()
   async hashPassword() {
-    this.password = await argon2.hash(this.password);
+    this._password = await argon2.hash(this._password);
   }
 }

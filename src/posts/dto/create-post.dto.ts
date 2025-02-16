@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   IsArray,
+  IsUrl,
 } from 'class-validator';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
@@ -28,6 +29,7 @@ export class CreatePostDto {
 
   @IsString()
   @IsOptional()
+  @IsUrl()
   thumbnailUrl?: string;
 
   @IsEnum(PostType)

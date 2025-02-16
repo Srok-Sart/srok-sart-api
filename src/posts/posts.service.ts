@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Repository } from 'typeorm';
@@ -19,21 +23,31 @@ export class PostsService {
     return await this.postRepository.save(post);
   }
 
-  async findAll() {
-    return await this.postRepository.find();
+  async findAll(): Promise<Post[]> {
+    const posts = await this.postRepository.find();
+
+    return posts;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Post> {
     const post = await this.postRepository.findOne({ where: { id } });
+
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
+
     return post;
   }
 
-  async update(id: number, updatePostDto: UpdatePostDto, files?: { images?: Express.Multer.File[]; thumbnail?: Express.Multer.File[] }) {
-    let post = await this.findOne(id); // Ensure post exists
-
+  async update(
+    id: number,
+    updatePostDto: UpdatePostDto,
+    files?: {
+      images?: Express.Multer.File[];
+      thumbnail?: Express.Multer.File[];
+    },
+  ) {
+    const post = await this.postRepository.findOne({ where: { id } });
     if (files) {
       const { imageUrls, thumbnailUrl } = this.uploadFiles(files);
       if (imageUrls.length > 0) {
@@ -49,22 +63,35 @@ export class PostsService {
   }
 
   async remove(id: number) {
-    const post = await this.findOne(id);
-    await this.postRepository.remove(post);
+    const post = await this.postRepository.findOneBy({ id });
+
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+
+    return await this.postRepository.remove(post);
   }
 
-  uploadFiles(files: { images?: Express.Multer.File[]; thumbnail?: Express.Multer.File[] }) {
+  uploadFiles(files: {
+    images?: Express.Multer.File[];
+    thumbnail?: Express.Multer.File[];
+  }) {
     console.log('Files received (upload service):', files);
 
     const images = files?.images || [];
     const thumbnailFiles = files?.thumbnail || [];
 
     if (images.length === 0 && thumbnailFiles.length === 0) {
-      throw new BadRequestException('At least one image or thumbnail should be uploaded');
+      throw new BadRequestException(
+        'At least one image or thumbnail should be uploaded',
+      );
     }
 
     const imageUrls = images.map((file) => `/uploads/${file.filename}`);
-    const thumbnailUrl = thumbnailFiles.length > 0 ? `/uploads/${thumbnailFiles[0].filename}` : null;
+    const thumbnailUrl =
+      thumbnailFiles.length > 0
+        ? `/uploads/${thumbnailFiles[0].filename}`
+        : null;
 
     return { imageUrls, thumbnailUrl };
   }

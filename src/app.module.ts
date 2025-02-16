@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { MaterialsModule } from './materials/materials.module';
 import { CommentsModule } from './comments/comments.module';
 import databaseConfig from 'db.config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -18,6 +20,10 @@ import databaseConfig from 'db.config';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     PostsModule,
     UsersModule,
     AuthModule,

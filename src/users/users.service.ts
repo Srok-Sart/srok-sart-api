@@ -8,7 +8,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { omit } from 'lodash';
 
 @Injectable()
 export class UsersService {
@@ -17,8 +16,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const user = this.usersRepo.create(createUserDto);
     try {
-      const savedUser = await this.usersRepo.save(user);
-      return omit(savedUser, ['password', 'hashedRefreshToken']) as User;
+      return await this.usersRepo.save(user);
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to create user. ${error.message}`,
@@ -27,16 +25,11 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return await this.usersRepo.find({
-      select: ['id', 'email', 'firstName', 'lastName', 'role'],
-    });
+    return await this.usersRepo.find();
   }
 
   async findOne(id: number): Promise<User> {
-    return await this.usersRepo.findOne({
-      where: { id },
-      select: ['id', 'email', 'hashedRefreshToken', 'role'],
-    });
+    return await this.usersRepo.findOneBy({ id });
   }
 
   async findByEmail(email: string): Promise<User> {
@@ -65,6 +58,10 @@ export class UsersService {
   }
 
   async updateRefreshToken(id: number, hashedRefreshToken: string) {
+    if (!id) {
+      throw new InternalServerErrorException('User ID is required');
+    }
+
     return this.usersRepo.update(id, { hashedRefreshToken });
   }
 
