@@ -14,6 +14,7 @@ import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { UsersService } from 'src/users/users.service';
 import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -27,7 +28,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    const payload = await this.authService.login(req.user.id);
+    const payload = await this.authService.login(req.user as User);
 
     return payload;
   }
@@ -64,7 +65,6 @@ export class AuthController {
   async googleLoginCallback(@Req() req, @Res() res) {
     const response = await this.authService.login(req.user.id);
 
-    // res.redirect(`${process.env.CLIENT_ORIGIN}?token=${response.accessToken}`);
-    res.redirect(`http://localhost:8000?token=${response.accessToken}`);
+    res.redirect(`${process.env.CLIENT_ORIGIN}?token=${response.accessToken}`);
   }
 }

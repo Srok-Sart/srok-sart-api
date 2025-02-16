@@ -1,4 +1,9 @@
+import { IsNotEmpty } from 'class-validator';
+
 export class CreatePostBookmarkDto {
-    readonly collectionId: number; 
-    readonly postId: number; 
+  @IsNotEmpty()
+  collectionId: number;
+
+  @IsNotEmpty()
+  postId: number;
 }

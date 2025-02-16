@@ -1,4 +1,10 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToMany,
+} from 'typeorm';
 import * as argon2 from 'argon2';
 import { Role } from 'src/auth/enums/role.enum';
 import { Exclude } from 'class-transformer';
@@ -37,8 +43,12 @@ export class User {
   @Column({ nullable: true })
   hashedRefreshToken: string;
 
-  @OneToMany(() => BookmarkCollection, (bookmarkCollection) => bookmarkCollection.user)
-  bookmarkCollections: BookmarkCollection[];
+  @OneToMany(
+    () => BookmarkCollection,
+    (bookmarkCollection) => bookmarkCollection._user,
+    { eager: true },
+  )
+  collections: BookmarkCollection[];
 
   @BeforeInsert()
   async hashPassword() {

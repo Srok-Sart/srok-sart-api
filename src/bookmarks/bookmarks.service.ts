@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Request } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BookmarkCollection } from './entities/bookmark-collection.entity';
@@ -16,13 +16,19 @@ export class BookmarksService {
     private readonly bookmarkCollectionRepository: Repository<BookmarkCollection>,
     @InjectRepository(PostBookmark)
     private readonly postBookmarkRepository: Repository<PostBookmark>,
-    @InjectRepository(Post) 
+    @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
   ) {}
 
-  // Bookmark Collection CRUD
-  async createCollection(createDto: CreateBookmarkCollectionDto): Promise<BookmarkCollection> {
-    const collection = this.bookmarkCollectionRepository.create(createDto);
+  async createCollection(
+    createDto: CreateBookmarkCollectionDto,
+    @Request() req,
+  ): Promise<BookmarkCollection> {
+    const collection = this.bookmarkCollectionRepository.create({
+      ...createDto,
+      _user: req.user,
+    });
+
     return this.bookmarkCollectionRepository.save(collection);
   }
 
@@ -31,16 +37,23 @@ export class BookmarksService {
   }
 
   async findOneCollection(id: number): Promise<BookmarkCollection> {
-    const collection = await this.bookmarkCollectionRepository.findOne({ where: { id } });
+    const collection = await this.bookmarkCollectionRepository.findOne({
+      where: { id },
+    });
     if (!collection) {
       throw new NotFoundException(`Collection with ID ${id} not found`);
     }
     return collection;
   }
 
-  async updateCollection(id: number, updateDto: UpdateBookmarkCollectionDto): Promise<BookmarkCollection> {
+  async updateCollection(
+    id: number,
+    updateDto: UpdateBookmarkCollectionDto,
+  ): Promise<BookmarkCollection> {
     const collection = await this.findOneCollection(id);
+
     this.bookmarkCollectionRepository.merge(collection, updateDto);
+
     return this.bookmarkCollectionRepository.save(collection);
   }
 
@@ -49,24 +62,30 @@ export class BookmarksService {
     await this.bookmarkCollectionRepository.remove(collection);
   }
 
-  // Post Bookmark CRUD
-  async createPostBookmark(createDto: CreatePostBookmarkDto): Promise<PostBookmark> {
+  async createPostBookmark(
+    createDto: CreatePostBookmarkDto,
+  ): Promise<PostBookmark> {
     const collection = await this.bookmarkCollectionRepository.findOneBy({
-        id: createDto.collectionId
-    })
+      id: createDto.collectionId,
+    });
+
     if (!collection) {
-      throw new NotFoundException(`BookmarkCollection with ID ${createDto.collectionId} not found`);
+      throw new NotFoundException(
+        `BookmarkCollection with ID ${createDto.collectionId} not found`,
+      );
     }
 
     const post = await this.postRepository.findOneBy({
-        id: createDto.postId
+      id: createDto.postId,
     });
+
     if (!post) {
       throw new NotFoundException(`Post with ID ${createDto.postId} not found`);
     }
 
     const postBookmark = this.postBookmarkRepository.create({
       collection,
+      post,
       date: new Date(),
     });
 
@@ -75,7 +94,7 @@ export class BookmarksService {
 
   async findAllPostBookmarks(): Promise<PostBookmark[]> {
     return this.postBookmarkRepository.find({
-      relations: ['collection'], 
+      relations: ['collection', 'post'],
     });
   }
 
@@ -90,7 +109,10 @@ export class BookmarksService {
     return postBookmark;
   }
 
-  async updatePostBookmark(id: number, updateDto: UpdatePostBookmarkDto): Promise<PostBookmark> {
+  async updatePostBookmark(
+    id: number,
+    updateDto: UpdatePostBookmarkDto,
+  ): Promise<PostBookmark> {
     const postBookmark = await this.findOnePostBookmark(id);
 
     if (updateDto.collectionId) {
@@ -98,7 +120,9 @@ export class BookmarksService {
         where: { id: updateDto.collectionId },
       });
       if (!collection) {
-        throw new NotFoundException(`BookmarkCollection with ID ${updateDto.collectionId} not found`);
+        throw new NotFoundException(
+          `BookmarkCollection with ID ${updateDto.collectionId} not found`,
+        );
       }
       postBookmark.collection = collection;
     }
