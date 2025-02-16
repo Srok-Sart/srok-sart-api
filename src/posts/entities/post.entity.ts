@@ -1,7 +1,8 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { Base } from 'src/core/base.entity';
+import { PostBookmark } from '../../bookmarks/entities/post-bookmark.entity';
 
 @Entity('posts')
 export class Post extends Base {
