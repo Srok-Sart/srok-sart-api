@@ -22,13 +22,14 @@ export class AuthService {
     private refreshJwtConfig,
   ) {}
 
-  async login(userId: number) {
-    const { accessToken, refreshToken } = await this.generateTokens(userId);
+  async login(user: User) {
+    const { accessToken, refreshToken } = await this.generateTokens(user.id);
 
-    await this.hashAndSaveRefreshToken(userId, refreshToken);
+    await this.hashAndSaveRefreshToken(user.id, refreshToken);
 
     return {
-      id: userId,
+      id: user.id,
+      email: user.email,
       accessToken,
       refreshToken,
     };

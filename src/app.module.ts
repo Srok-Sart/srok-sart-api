@@ -11,6 +11,7 @@ import { CommentsModule } from './comments/comments.module';
 import databaseConfig from 'db.config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { join } from 'path';
     AuthModule,
     MaterialsModule,
     CommentsModule,
+    BookmarksModule,
   ],
   controllers: [AppController],
   providers: [AppService],
