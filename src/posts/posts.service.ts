@@ -1,25 +1,40 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
 import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { existsSync } from 'fs';
-import { join } from 'path';
-import { Response } from 'express';
+import { FileUploadService } from './file-upload.service';
+import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
+    private fileUploadService: FileUploadService,
   ) {}
 
-  async create(createPostDto: CreatePostDto) {
-    const post = this.postRepository.create(createPostDto);
+  async create(
+    createPostDto: CreatePostDto,
+    files: {
+      thumbnail?: Express.Multer.File[];
+      images?: Express.Multer.File[];
+    },
+  ) {
+    const thumbnailUrl = files.thumbnail?.length
+      ? await this.fileUploadService.saveFile(files.thumbnail[0])
+      : null;
+
+    const imageUrls = files.images?.length
+      ? await this.fileUploadService.saveMultipleFiles(files.images)
+      : [];
+
+    const postData = {
+      ...createPostDto,
+      thumbnailUrl,
+      imageUrls,
+    };
+
+    const post = this.postRepository.create(postData);
     return await this.postRepository.save(post);
   }
 
@@ -43,23 +58,35 @@ export class PostsService {
     id: number,
     updatePostDto: UpdatePostDto,
     files?: {
-      images?: Express.Multer.File[];
       thumbnail?: Express.Multer.File[];
+      images?: Express.Multer.File[];
     },
   ) {
     const post = await this.postRepository.findOne({ where: { id } });
-    if (files) {
-      const { imageUrls, thumbnailUrl } = this.uploadFiles(files);
-      if (imageUrls.length > 0) {
-        updatePostDto.imageUrls = imageUrls;
-      }
-      if (thumbnailUrl) {
-        updatePostDto.thumbnailUrl = thumbnailUrl;
-      }
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
     }
 
-    Object.assign(post, updatePostDto);
-    return await this.postRepository.save(post);
+    // Upload new files if provided
+    let thumbnailUrl = post.thumbnailUrl;
+    if (files?.thumbnail?.length) {
+      thumbnailUrl = await this.fileUploadService.saveFile(files.thumbnail[0]);
+    }
+
+    let imageUrls = post.imageUrls || [];
+    if (files?.images?.length) {
+      imageUrls = await this.fileUploadService.saveMultipleFiles(files.images);
+    }
+
+    // Merge updates into existing post
+    const updatedPost = {
+      ...post,
+      ...updatePostDto,
+      thumbnailUrl,
+      imageUrls,
+    };
+
+    return await this.postRepository.save(updatedPost);
   }
 
   async remove(id: number) {
@@ -70,39 +97,5 @@ export class PostsService {
     }
 
     return await this.postRepository.remove(post);
-  }
-
-  uploadFiles(files: {
-    images?: Express.Multer.File[];
-    thumbnail?: Express.Multer.File[];
-  }) {
-    console.log('Files received (upload service):', files);
-
-    const images = files?.images || [];
-    const thumbnailFiles = files?.thumbnail || [];
-
-    if (images.length === 0 && thumbnailFiles.length === 0) {
-      throw new BadRequestException(
-        'At least one image or thumbnail should be uploaded',
-      );
-    }
-
-    const imageUrls = images.map((file) => `/uploads/${file.filename}`);
-    const thumbnailUrl =
-      thumbnailFiles.length > 0
-        ? `/uploads/${thumbnailFiles[0].filename}`
-        : null;
-
-    return { imageUrls, thumbnailUrl };
-  }
-
-  async getUploadedFile(filename: string, res: Response) {
-    const filePath = join(process.cwd(), 'uploads', filename);
-
-    if (!existsSync(filePath)) {
-      throw new NotFoundException(`File ${filename} not found`);
-    }
-
-    return res.sendFile(filePath);
   }
 }

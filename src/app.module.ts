@@ -22,7 +22,7 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
     }),
     TypeOrmModule.forRootAsync(databaseConfig.asProvider()),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
     PostsModule,

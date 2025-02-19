@@ -114,8 +114,6 @@ export class AuthService {
     try {
       const user = await this.usersService.findOne(payload.sub);
 
-      console.log('user', user.hashedRefreshToken);
-
       if (!user || !user.hashedRefreshToken) {
         throw new UnauthorizedException('Invalid Refresh Token');
       }
