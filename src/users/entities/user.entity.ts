@@ -27,8 +27,9 @@ export class User {
   @Column({ unique: true, type: 'varchar', length: 40 })
   email: string;
 
+  @Exclude()
   @Column({ name: 'password' })
-  _password: string;
+  password: string;
 
   @Column({ nullable: true })
   profileImageUrl: string;
@@ -52,6 +53,7 @@ export class User {
 
   @BeforeInsert()
   async hashPassword() {
-    this._password = await argon2.hash(this._password);
+    this.password = await argon2.hash(this.password);
+    console.log(this.password);
   }
 }
