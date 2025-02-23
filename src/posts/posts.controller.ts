@@ -57,6 +57,7 @@ export class PostsController {
     return this.postsService.findOne(+id);
   }
 
+  @Public()
   @Patch(':id')
   @UseInterceptors(
     FileFieldsInterceptor(

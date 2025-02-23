@@ -2,6 +2,7 @@ import { Column, Entity } from 'typeorm';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { Base } from 'src/core/base.entity';
+import { PostStatus } from '../enums/post-status.enum';
 
 @Entity('posts')
 export class Post extends Base {
@@ -39,4 +40,12 @@ export class Post extends Base {
     nullable: true,
   })
   postDifficulty: PostDifficulty;
+
+  @Column({
+    type: 'enum',
+    enum: PostStatus,
+    default: PostStatus.PENDING,
+    nullable: true,
+  })
+  postStatus: PostStatus;
 }
