@@ -8,6 +8,7 @@ import {
 } from 'class-validator';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
+import { PostStatus } from '../enums/post-status.enum';
 
 export class CreatePostDto {
   @IsString()
@@ -37,4 +38,8 @@ export class CreatePostDto {
 
   @IsEnum(PostDifficulty)
   postDifficulty: PostDifficulty;
+
+  @IsOptional()
+  @IsEnum(PostStatus)
+  postStatus: PostStatus;
 }
