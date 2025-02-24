@@ -1,32 +1,22 @@
 entity: User
 parameters: {}
-processor: ../dist/processor/userProcessor
+processor: '../../src/processor/UserProcessor'  
 items:
   user1:
+    firstName: 'po'
+    lastName: 'lo'
+    email: 'polo@gmail.com'
+    username: 'admin123'
+    password: 'password123'
+    profileImageUrl: '/avatar.jpg'
+    bio: 'Test user bio'
+    role: 'USER'
+  user{2..10}:
     firstName: '{{name.firstName}}'
     lastName: '{{name.lastName}}'
     email: '{{internet.email}}'
-    __call:
-      setPassword:
-        - foo
-  user2:
-    firstName: '{{name.firstName}}'
-    lastName: '{{name.lastName}}'
-    email: '{{internet.email}}'
-    __call:
-      setPassword:
-        - foo
-  user3:
-    firstName: '{{name.firstName}}'
-    lastName: '{{name.lastName}}'
-    email: '{{internet.email}}'
-    __call:
-      setPassword:
-        - foo
-  user4:
-    firstName: '{{name.firstName}}'
-    lastName: '{{name.lastName}}'
-    email: '{{internet.email}}'
-    __call:
-      setPassword:
-        - foo
+    username: '{{internet.userName}}'
+    password: 'password123'
+    profileImageUrl: '/avatar.jpg'
+    bio: '{{lorem.paragraph}}'
+    role: 'USER'

@@ -1,0 +1,7 @@
+entity: Comment
+parameters: {}
+items:
+  comment{1..50}:
+    content: '{{lorem.sentence}}'
+    user: '@user*'
+    post: '@post*'

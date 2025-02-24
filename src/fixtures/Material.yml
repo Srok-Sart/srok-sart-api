@@ -1,0 +1,9 @@
+entity: Material
+parameters: {}
+items:
+  material{1..20}:
+    name: '{{commerce.productName}}'
+    weightPerUnit: '{{number.int(10,1000)}}'
+    environmentalImpact: '{{number.int(1,10)}}'
+    category: '{{helpers.arrayElement(["PLASTIC", "PAPER", "METAL", "GLASS", "TEXTILE", "ORGANIC", "ELECTRONIC", "BATTERY", "OTHER"])}}'
+    unit: '{{helpers.arrayElement(["KG", "G", "L", "ML", "PIECE", "PACK", "BOTTLE", "SPOON"])}}'
