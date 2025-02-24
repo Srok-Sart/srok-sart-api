@@ -3,7 +3,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FileUploadService } from './file-upload.service';
+import { FileUploadService } from '../services/file-upload.service';
 import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
