@@ -168,6 +168,7 @@ export class PostsService {
 
     // Handle material updates if materialIds are provided
     let materials = post.materials;
+
     if (updatePostDto.materialIds && updatePostDto.materialIds.length > 0) {
       materials = await this.materialRepository.findBy({
         id: In(updatePostDto.materialIds),
