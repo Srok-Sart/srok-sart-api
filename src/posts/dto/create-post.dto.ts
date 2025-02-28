@@ -5,10 +5,12 @@ import {
   IsString,
   IsArray,
   IsUrl,
+  IsNumber,
 } from 'class-validator';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { PostStatus } from '../enums/post-status.enum';
+import { Type } from 'class-transformer';
 
 export class CreatePostDto {
   @IsString()
@@ -42,4 +44,9 @@ export class CreatePostDto {
   @IsOptional()
   @IsEnum(PostStatus)
   postStatus: PostStatus;
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  materialIds: number[];
 }

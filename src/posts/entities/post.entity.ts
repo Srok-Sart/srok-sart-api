@@ -1,5 +1,13 @@
 import { Base } from 'src/core/base.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Material } from 'src/materials/entities/material.entity';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { PostStatus } from '../enums/post-status.enum';
@@ -60,4 +68,8 @@ export class Post extends Base {
 
   @OneToMany(() => PostCompletion, (postCompletion) => postCompletion.post)
   completions: PostCompletion[];
+
+  @ManyToMany(() => Material, (material) => material.posts, { eager: true })
+  @JoinTable()
+  materials: Material[];
 }

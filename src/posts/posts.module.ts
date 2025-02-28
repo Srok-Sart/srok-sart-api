@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MaterialsModule } from 'src/materials/materials.module';
 import { FileUploadService } from '../services/file-upload.service';
 import { User } from '../users/entities/user.entity';
 import { PostCompletion } from './entities/post-completion.entity';
@@ -11,7 +12,10 @@ import { PostsController } from './posts.controller';
 import { PostsService } from './posts.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post, PostLike, User, PostCompletion])],
+  imports: [
+    TypeOrmModule.forFeature([Post, PostLike, User, PostCompletion]),
+    MaterialsModule,
+  ],
   controllers: [PostsController],
   providers: [
     PostsService,
