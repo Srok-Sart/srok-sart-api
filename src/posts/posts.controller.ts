@@ -9,7 +9,9 @@ import {
   Post,
   UploadedFiles,
   UseInterceptors,
-} from '@nestjs/common';
+  HttpCode,
+  HttpStatus,
+}  from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { Public } from 'src/auth/decorators/public.decorator';
@@ -82,5 +84,19 @@ export class PostsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.postsService.remove(+id);
+  }
+
+  @Public()
+  @Post(':id/like')
+  @HttpCode(HttpStatus.OK)
+  async likePost(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.incrementLike(id);
+  }
+
+  @Public()
+  @Delete(':id/like')
+  @HttpCode(HttpStatus.OK)
+  async unlikePost(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.decrementLike(id);
   }
 }
