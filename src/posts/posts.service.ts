@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { Repository } from 'typeorm';
-import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { FileUploadService } from '../services/file-upload.service';
+import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { Post } from './entities/post.entity';
 
 @Injectable()
 export class PostsService {
@@ -17,15 +17,15 @@ export class PostsService {
     createPostDto: CreatePostDto,
     files: {
       thumbnail?: Express.Multer.File[];
-      images?: Express.Multer.File[];
+      contents?: Express.Multer.File[];
     },
   ) {
     const thumbnailUrl = files.thumbnail?.length
       ? await this.fileUploadService.saveFile(files.thumbnail[0])
       : null;
 
-    const imageUrls = files.images?.length
-      ? await this.fileUploadService.saveMultipleFiles(files.images)
+    const imageUrls = files.contents?.length
+      ? await this.fileUploadService.saveMultipleFiles(files.contents)
       : [];
 
     const postData = {
@@ -59,7 +59,7 @@ export class PostsService {
     updatePostDto: UpdatePostDto,
     files?: {
       thumbnail?: Express.Multer.File[];
-      images?: Express.Multer.File[];
+      contents?: Express.Multer.File[];
     },
   ) {
     const post = await this.postRepository.findOne({ where: { id } });
@@ -74,8 +74,10 @@ export class PostsService {
     }
 
     let imageUrls = post.imageUrls || [];
-    if (files?.images?.length) {
-      imageUrls = await this.fileUploadService.saveMultipleFiles(files.images);
+    if (files?.contents?.length) {
+      imageUrls = await this.fileUploadService.saveMultipleFiles(
+        files.contents,
+      );
     }
 
     // Merge updates into existing post

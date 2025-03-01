@@ -8,13 +8,13 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { AuthService } from './auth.service';
+import { Public } from './decorators/public.decorator';
+import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth/local-auth.guard';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
-import { Public } from './decorators/public.decorator';
-import { UsersService } from 'src/users/users.service';
-import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
-import { User } from 'src/users/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -63,7 +63,8 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
   async googleLoginCallback(@Req() req, @Res() res) {
-    const response = await this.authService.login(req.user.id);
+    console.log('req.user', req.user);
+    const response = await this.authService.login(req.user);
 
     res.redirect(`${process.env.CLIENT_ORIGIN}?token=${response.accessToken}`);
   }

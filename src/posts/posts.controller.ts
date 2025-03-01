@@ -1,21 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
-  UseInterceptors,
-  UploadedFiles,
+  Get,
+  Param,
   ParseIntPipe,
   Patch,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { Public } from 'src/auth/decorators/public.decorator';
 import { memoryStorage } from 'multer';
+import { Public } from 'src/auth/decorators/public.decorator';
+import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PostsService } from './posts.service';
 
 @Controller('posts')
 export class PostsController {
@@ -24,10 +24,7 @@ export class PostsController {
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor(
-      [
-        { name: 'thumbnail', maxCount: 1 },
-        { name: 'images', maxCount: 5 },
-      ],
+      [{ name: 'thumbnail', maxCount: 1 }, { name: 'contents' }],
       {
         storage: memoryStorage(),
       },
@@ -38,7 +35,7 @@ export class PostsController {
     @UploadedFiles()
     files: {
       thumbnail?: Express.Multer.File[];
-      images?: Express.Multer.File[];
+      contents?: Express.Multer.File[];
     },
   ) {
     return this.postsService.create(createPostDto, files);
@@ -62,7 +59,7 @@ export class PostsController {
     FileFieldsInterceptor(
       [
         { name: 'thumbnail', maxCount: 1 },
-        { name: 'images', maxCount: 5 },
+        { name: 'contents', maxCount: 5 },
       ],
       {
         storage: memoryStorage(),
@@ -75,7 +72,7 @@ export class PostsController {
     @UploadedFiles()
     files?: {
       thumbnail?: Express.Multer.File[];
-      images?: Express.Multer.File[];
+      contents?: Express.Multer.File[];
     },
   ) {
     return this.postsService.update(id, updatePostDto, files);

@@ -1,12 +1,11 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import {
   ClassSerializerInterceptor,
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   try {
@@ -26,6 +25,9 @@ async function bootstrap() {
 function setupGlobalConfig(app: INestApplication): void {
   app.enableCors({
     origin: ['http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Global pipes
