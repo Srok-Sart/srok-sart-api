@@ -98,4 +98,20 @@ export class PostsService {
 
     return await this.postRepository.remove(post);
   }
+
+  async incrementLike(id: number) {
+    const post = await this.findOne(id);
+    post.likeCount += 1;
+    await this.postRepository.save(post);
+    return { success: true, likeCount: post.likeCount };
+  }
+
+  async decrementLike(id: number) {
+    const post = await this.findOne(id);
+    if (post.likeCount > 0) {
+      post.likeCount -= 1;
+    }
+    await this.postRepository.save(post);
+    return { success: true, likeCount: post.likeCount };
+  }
 }

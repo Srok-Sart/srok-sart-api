@@ -9,7 +9,9 @@ import {
   UploadedFiles,
   ParseIntPipe,
   Patch,
-} from '@nestjs/common';
+  HttpCode,
+  HttpStatus,
+}  from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -85,5 +87,19 @@ export class PostsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.postsService.remove(+id);
+  }
+
+  @Public()
+  @Post(':id/like')
+  @HttpCode(HttpStatus.OK)
+  async likePost(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.incrementLike(id);
+  }
+
+  @Public()
+  @Delete(':id/like')
+  @HttpCode(HttpStatus.OK)
+  async unlikePost(@Param('id', ParseIntPipe) id: number) {
+    return this.postsService.decrementLike(id);
   }
 }
