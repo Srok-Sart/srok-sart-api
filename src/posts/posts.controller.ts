@@ -11,13 +11,16 @@ import {
   UseInterceptors,
   HttpCode,
   HttpStatus,
-}  from '@nestjs/common';
+  Request,
+} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostsService } from './posts.service';
+import { PostLikeResponseDto } from './dto/post-like-response.dto';
+
 
 @Controller('posts')
 export class PostsController {
@@ -86,17 +89,32 @@ export class PostsController {
     return this.postsService.remove(+id);
   }
 
-  @Public()
-  @Post(':id/like')
-  @HttpCode(HttpStatus.OK)
-  async likePost(@Param('id', ParseIntPipe) id: number) {
-    return this.postsService.incrementLike(id);
+  @Get('liked')
+  async getLikedPosts(@Request() req) {
+    return this.postsService.getLikedPosts(req.user.id);
   }
 
-  @Public()
+  @Post(':id/like')
+  @HttpCode(HttpStatus.OK)
+  async likePost(
+    @Param('id', ParseIntPipe) id: number, 
+    @Request() req
+  ): Promise<PostLikeResponseDto> {
+    return this.postsService.likePost(id, req.user.id);
+  }
+
   @Delete(':id/like')
   @HttpCode(HttpStatus.OK)
-  async unlikePost(@Param('id', ParseIntPipe) id: number) {
-    return this.postsService.decrementLike(id);
+  async unlikePost(
+    @Param('id', ParseIntPipe) id: number, 
+    @Request() req
+  ): Promise<PostLikeResponseDto> {
+    return this.postsService.unlikePost(id, req.user.id);
+  }
+
+  @Get(':id/liked')
+  async checkIfLiked(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    const isLiked = await this.postsService.checkIfUserLikedPost(id, req.user.id);
+    return { isLiked };
   }
 }
