@@ -1,0 +1,7 @@
+// Define a generic pagination interface
+export interface PaginationResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}

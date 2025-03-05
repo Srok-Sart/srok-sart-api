@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
   HttpCode,
@@ -48,8 +49,23 @@ export class PostsController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  findAll(
+    @Query('search') search?: string,
+    @Query('filter') filter?: string,
+    @Query('sort') sort: string = 'createdAt:DESC',
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    return this.postsService.findAll({
+      search,
+      filter,
+      sort,
+      page: pageNumber,
+      limit: limitNumber,
+    });
   }
 
   @Public()

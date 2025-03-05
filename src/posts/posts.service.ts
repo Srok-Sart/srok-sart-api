@@ -7,6 +7,15 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { PostLike } from './entities/post-like.entity';
 import { User } from '../users/entities/user.entity';
+import { PaginationResult } from 'src/interfaces/paginate-result.interface';
+
+interface QueryParams {
+  search?: string;
+  filter?: string;
+  sort?: string;
+  page: number;
+  limit: number;
+}
 
 @Injectable()
 export class PostsService {
@@ -42,10 +51,55 @@ export class PostsService {
     return await this.postRepository.save(post);
   }
 
-  async findAll(): Promise<Post[]> {
-    const posts = await this.postRepository.find();
+  async findAll({
+    search,
+    filter,
+    sort,
+    page,
+    limit,
+  }: QueryParams): Promise<PaginationResult<Post>> {
+    const qb = this.postRepository.createQueryBuilder('post');
 
-    return posts;
+    // Global search on title and description fields.
+    if (search) {
+      qb.andWhere(
+        '(post.title ILIKE :search OR post.description ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    // Dynamic Filtering: expects comma-separated "field:value" pairs.
+    if (filter) {
+      const allowedFilters = ['postType', 'postDifficulty', 'postStatus'];
+      const filters = filter.split(',');
+      filters.forEach((f) => {
+        const [field, value] = f.split(':');
+        if (field && value && allowedFilters.includes(field)) {
+          qb.andWhere(`post.${field} = :${field}`, { [field]: value });
+        }
+      });
+    }
+
+    // Dynamic Sorting: supports multiple fields, comma-separated "field:order".
+    if (sort) {
+      const sortParams = sort.split(',');
+      sortParams.forEach((s) => {
+        const [field, order] = s.split(':');
+        qb.addOrderBy(
+          `post.${field}`,
+          order && order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC',
+        );
+      });
+    } else {
+      qb.addOrderBy('post.createdAt', 'DESC');
+    }
+
+    // Apply pagination
+    qb.skip((page - 1) * limit).take(limit);
+
+    // Execute the query and get results along with total count for pagination.
+    const [data, total] = await qb.getManyAndCount();
+    return { data, total, page, limit };
   }
 
   async findOne(id: number): Promise<Post> {
