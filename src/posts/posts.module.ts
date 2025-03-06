@@ -6,10 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FileUploadService } from '../services/file-upload.service';
 import { PostLike } from './entities/post-like.entity';
 import { User } from '../users/entities/user.entity';
+import { PostLikesService } from './posts-like.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Post, PostLike, User])],
   controllers: [PostsController],
-  providers: [PostsService, FileUploadService],
+  providers: [PostsService, PostLikesService, FileUploadService],
 })
 export class PostsModule {}

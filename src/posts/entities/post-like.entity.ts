@@ -8,11 +8,9 @@ export class PostLike {
   id: number;
 
   @ManyToOne(() => Post, post => post.likes, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'post_id' })
   post: Post;
-
+  
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @CreateDateColumn()

@@ -1,12 +1,10 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileUploadService } from '../services/file-upload.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
-import { PostLike } from './entities/post-like.entity';
-import { User } from '../users/entities/user.entity';
 import { PaginationResult } from 'src/interfaces/paginate-result.interface';
 
 interface QueryParams {
@@ -21,8 +19,6 @@ interface QueryParams {
 export class PostsService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
-    @InjectRepository(PostLike) private postLikeRepository: Repository<PostLike>,
-    @InjectRepository(User) private userRepository: Repository<User>,
     private fileUploadService: FileUploadService,
   ) {}
 
@@ -157,107 +153,5 @@ export class PostsService {
     }
 
     return await this.postRepository.remove(post);
-  }
-
-  async incrementLike(id: number) {
-    const post = await this.findOne(id);
-    post.likeCount += 1;
-    await this.postRepository.save(post);
-    return { success: true, likeCount: post.likeCount };
-  }
-
-  async decrementLike(id: number) {
-    const post = await this.findOne(id);
-    if (post.likeCount > 0) {
-      post.likeCount -= 1;
-    }
-    await this.postRepository.save(post);
-    return { success: true, likeCount: post.likeCount };
-  }
-
-  async getLikedPosts(userId: number): Promise<number[]> {
-    const likes = await this.postLikeRepository.find({
-      where: { user: { id: userId } },
-      relations: ['post'],
-    });
-    
-    return likes.map(like => like.post.id);
-  }
-
-  async likePost(postId: number, userId: number) {
-    const post = await this.findOne(postId);
-    
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-
-    const existingLike = await this.postLikeRepository.findOne({
-      where: {
-        post: { id: postId },
-        user: { id: userId },
-      },
-    });
-
-    if (existingLike) {
-      throw new ConflictException('You have already liked this post');
-    }
-
-    const like = this.postLikeRepository.create({
-      post,
-      user,
-    });
-
-    await this.postLikeRepository.save(like);
-
-    post.likeCount += 1;
-    await this.postRepository.save(post);
-
-    return {
-      success: true,
-      likeCount: post.likeCount,
-    };
-  }
-
-  async unlikePost(postId: number, userId: number) {
-    // Check if the post exists
-    const post = await this.findOne(postId);
-
-    // Find the like
-    const like = await this.postLikeRepository.findOne({
-      where: {
-        post: { id: postId },
-        user: { id: userId },
-      },
-    });
-
-    if (!like) {
-      throw new NotFoundException('You have not liked this post');
-    }
-
-    // Remove the like
-    await this.postLikeRepository.remove(like);
-
-    // Decrement the like count on the post
-    if (post.likeCount > 0) {
-      post.likeCount -= 1;
-      await this.postRepository.save(post);
-    }
-
-    return {
-      success: true,
-      likeCount: post.likeCount,
-    };
-  }
-
-  async checkIfUserLikedPost(postId: number, userId: number): Promise<boolean> {
-    const like = await this.postLikeRepository.findOne({
-      where: {
-        post: { id: postId },
-        user: { id: userId },
-      },
-    });
-
-    return !!like;
   }
 }
