@@ -1,5 +1,15 @@
+import { IsOptional, IsString, IsBoolean } from 'class-validator';
+
 export class UpdateBookmarkCollectionDto {
-    readonly name?: string;
-    readonly description?: string;
-    readonly isPrivate?: boolean;
+  @IsOptional()
+  @IsString()
+  readonly name?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly description?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  readonly isPrivate?: boolean;
 }
