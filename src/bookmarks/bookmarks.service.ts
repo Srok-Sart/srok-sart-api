@@ -51,9 +51,11 @@ export class BookmarksService {
     updateDto: UpdateBookmarkCollectionDto,
   ): Promise<BookmarkCollection> {
     const collection = await this.findOneCollection(id);
-
+  
+    // Merge the updateDto with the existing collection
     this.bookmarkCollectionRepository.merge(collection, updateDto);
-
+  
+    // Save the updated collection
     return this.bookmarkCollectionRepository.save(collection);
   }
 
@@ -109,6 +111,16 @@ export class BookmarksService {
     return postBookmark;
   }
 
+  async findPostsInCollection(collectionId: number): Promise<Post[]> {
+    const postBookmarks = await this.postBookmarkRepository.find({
+      where: { collection: { id: collectionId } },
+      relations: ['post'], // Include the post relation
+    });
+  
+    // Extract and return the posts
+    return postBookmarks.map((bookmark) => bookmark.post);
+  }
+
   async updatePostBookmark(
     id: number,
     updateDto: UpdatePostBookmarkDto,
@@ -134,4 +146,32 @@ export class BookmarksService {
     const postBookmark = await this.findOnePostBookmark(id);
     await this.postBookmarkRepository.remove(postBookmark);
   }
+
+  async findAllPostBookmarksGroupedByCollection(): Promise<any> {
+    const postBookmarks = await this.postBookmarkRepository.find({
+      relations: ['collection', 'post'],
+    });
+  
+    const groupedByCollection = postBookmarks.reduce((acc, bookmark) => {
+      const collectionId = bookmark.collection.id;
+      if (!acc[collectionId]) {
+        acc[collectionId] = {
+          ...bookmark.collection, // Include all collection properties
+          posts: [], // Initialize posts array
+        };
+      }
+      if (bookmark.post) {
+        acc[collectionId].posts.push(bookmark.post);
+      }
+      return acc;
+    }, {});
+  
+    return Object.values(groupedByCollection);
+  }
+
+  async unsavePostFromCollection(collectionId: number, postId: number): Promise<void> {
+    await this.postBookmarkRepository.delete({ collection: { id: collectionId }, post: { id: postId } });
+  }
 }
+
+
