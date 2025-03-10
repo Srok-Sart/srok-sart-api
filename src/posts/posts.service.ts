@@ -6,6 +6,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { PaginationResult } from 'src/interfaces/paginate-result.interface';
+import { User } from '../users/entities/user.entity';
 
 interface QueryParams {
   search?: string;
@@ -19,6 +20,7 @@ interface QueryParams {
 export class PostsService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
+    @InjectRepository(User) private userRepository: Repository<User>,
     private fileUploadService: FileUploadService,
   ) {}
 
@@ -28,21 +30,30 @@ export class PostsService {
       thumbnail?: Express.Multer.File[];
       contents?: Express.Multer.File[];
     },
+    userId: number,
   ) {
     const thumbnailUrl = files.thumbnail?.length
       ? await this.fileUploadService.saveFile(files.thumbnail[0])
       : null;
-
+  
     const imageUrls = files.contents?.length
       ? await this.fileUploadService.saveMultipleFiles(files.contents)
       : [];
-
+  
+    // Find user
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+  
     const postData = {
       ...createPostDto,
       thumbnailUrl,
       imageUrls,
+      user, 
+      userId, 
     };
-
+  
     const post = this.postRepository.create(postData);
     return await this.postRepository.save(post);
   }

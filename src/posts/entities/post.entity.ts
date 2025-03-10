@@ -1,9 +1,10 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { PostType } from '../enums/post-type.enum';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { Base } from 'src/core/base.entity';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostLike } from './post-like.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('posts')
 export class Post extends Base {
@@ -33,6 +34,9 @@ export class Post extends Base {
 
   @OneToMany(() => PostLike, like => like.post)
   likes: PostLike[];
+
+  @ManyToOne(() => User, user => user.posts)
+  user: User;
 
   @Column({ type: 'enum', enum: PostType, default: PostType.IMAGE })
   postType: PostType;

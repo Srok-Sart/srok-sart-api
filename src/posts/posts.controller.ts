@@ -13,6 +13,7 @@ import {
   HttpCode,
   HttpStatus,
   Request,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -30,7 +31,6 @@ export class PostsController {
     private readonly postLikesService: PostLikesService,
   ) {}
   
-  @Public()
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -47,8 +47,15 @@ export class PostsController {
       thumbnail?: Express.Multer.File[];
       contents?: Express.Multer.File[];
     },
+    @Request() req,
   ) {
-    return this.postsService.create(createPostDto, files);
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      throw new UnauthorizedException('User must be authenticated to create posts');
+    }
+    
+    return this.postsService.create(createPostDto, files, userId);
   }
 
   @Public()
