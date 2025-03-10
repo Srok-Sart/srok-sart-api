@@ -14,6 +14,7 @@ interface QueryParams {
   sort?: string;
   page: number;
   limit: number;
+  userId?: number;
 }
 
 @Injectable()
@@ -64,8 +65,12 @@ export class PostsService {
     sort,
     page,
     limit,
+    userId,
   }: QueryParams): Promise<PaginationResult<Post>> {
     const qb = this.postRepository.createQueryBuilder('post');
+
+    // Add the user relation to the query
+    qb.leftJoinAndSelect('post.user', 'user');
 
     // Global search on title and description fields.
     if (search) {
@@ -75,6 +80,11 @@ export class PostsService {
       );
     }
 
+    // Filter by userId if provided
+    if (userId) {
+      qb.andWhere('post.user = :userId', { userId });
+    }
+  
     // Dynamic Filtering: expects comma-separated "field:value" pairs.
     if (filter) {
       const allowedFilters = ['postType', 'postDifficulty', 'postStatus'];

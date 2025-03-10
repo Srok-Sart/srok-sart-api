@@ -63,16 +63,19 @@ export class PostsController {
   findAll(
     @Query('search') search?: string,
     @Query('filter') filter?: string,
+    @Query('userId') userId?: string,
     @Query('sort') sort: string = 'createdAt:DESC',
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
   ) {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
+    const userIdNumber = userId ? parseInt(userId, 10) : undefined;
 
     return this.postsService.findAll({
       search,
       filter,
+      userId: userIdNumber,
       sort,
       page: pageNumber,
       limit: limitNumber,
