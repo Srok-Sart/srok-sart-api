@@ -81,6 +81,12 @@ export class PostsController {
       limit: limitNumber,
     });
   }
+  
+  // Post like related endpoints - now using PostLikesService
+  @Get('liked')
+  async getLikedPosts(@Request() req) {
+    return this.postLikesService.getLikedPosts(req.user.id);
+  }
 
   @Public()
   @Get(':id')
@@ -117,12 +123,6 @@ export class PostsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.postsService.remove(+id);
-  }
-
-  // Post like related endpoints - now using PostLikesService
-  @Get('liked')
-  async getLikedPosts(@Request() req) {
-    return this.postLikesService.getLikedPosts(req.user.id);
   }
 
   @Post(':id/like')
