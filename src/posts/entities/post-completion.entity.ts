@@ -11,9 +11,6 @@ export class PostCompletion extends Base {
   @ManyToOne(() => User, (user) => user.completions)
   user: User;
 
-  @Column()
-  completedAt: Date;
-
   @Column({
     type: 'jsonb',
     array: false,

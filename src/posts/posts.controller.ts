@@ -10,26 +10,20 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   Request,
   UnauthorizedException,
   UploadedFiles,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { InjectRepository } from '@nestjs/typeorm';
 import { memoryStorage } from 'multer';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostLikeResponseDto } from './dto/post-like-response.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { PostCompletion } from './entities/post-completion.entity';
 import { PostCompletionService } from './post-completion.service';
 import { PostLikesService } from './posts-like.service';
 import { PostsService } from './posts.service';
-import { Repository } from 'typeorm';
 
 @Controller('posts')
 export class PostsController {
@@ -37,8 +31,6 @@ export class PostsController {
     private readonly postsService: PostsService,
     private readonly postLikesService: PostLikesService,
     private readonly postCompletionService: PostCompletionService,
-    // @InjectRepository(PostCompletion)
-    // private postCompletionRepository: Repository<PostCompletion>,
   ) {}
 
   @Post()
@@ -165,8 +157,8 @@ export class PostsController {
   }
 
   @Post(':id/complete')
-  @UseGuards(JwtAuthGuard)
-  async markAsCompleted(@Param('id') id: string, @Req() req: Request) {
+  async markAsCompleted(@Param('id') id: string, @Request() req) {
+    console.log('req.user', req.user);
     const userId = req.user['id'];
     const postId = parseInt(id, 10);
 
