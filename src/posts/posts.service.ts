@@ -6,6 +6,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
 import { PaginationResult } from 'src/interfaces/paginate-result.interface';
+import { User } from '../users/entities/user.entity';
 
 interface QueryParams {
   search?: string;
@@ -13,12 +14,14 @@ interface QueryParams {
   sort?: string;
   page: number;
   limit: number;
+  userId?: number;
 }
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
+    @InjectRepository(User) private userRepository: Repository<User>,
     private fileUploadService: FileUploadService,
   ) {}
 
@@ -28,21 +31,30 @@ export class PostsService {
       thumbnail?: Express.Multer.File[];
       contents?: Express.Multer.File[];
     },
+    userId: number,
   ) {
     const thumbnailUrl = files.thumbnail?.length
       ? await this.fileUploadService.saveFile(files.thumbnail[0])
       : null;
-
+  
     const imageUrls = files.contents?.length
       ? await this.fileUploadService.saveMultipleFiles(files.contents)
       : [];
-
+  
+    // Find user
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+  
     const postData = {
       ...createPostDto,
       thumbnailUrl,
       imageUrls,
+      user, 
+      userId, 
     };
-
+  
     const post = this.postRepository.create(postData);
     return await this.postRepository.save(post);
   }
@@ -53,8 +65,12 @@ export class PostsService {
     sort,
     page,
     limit,
+    userId,
   }: QueryParams): Promise<PaginationResult<Post>> {
     const qb = this.postRepository.createQueryBuilder('post');
+
+    // Add the user relation to the query
+    qb.leftJoinAndSelect('post.user', 'user');
 
     // Global search on title and description fields.
     if (search) {
@@ -64,6 +80,11 @@ export class PostsService {
       );
     }
 
+    // Filter by userId if provided
+    if (userId) {
+      qb.andWhere('post.user = :userId', { userId });
+    }
+  
     // Dynamic Filtering: expects comma-separated "field:value" pairs.
     if (filter) {
       const allowedFilters = ['postType', 'postDifficulty', 'postStatus'];

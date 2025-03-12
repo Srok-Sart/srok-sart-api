@@ -13,6 +13,7 @@ import {
   HttpCode,
   HttpStatus,
   Request,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -30,7 +31,6 @@ export class PostsController {
     private readonly postLikesService: PostLikesService,
   ) {}
   
-  @Public()
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -47,8 +47,15 @@ export class PostsController {
       thumbnail?: Express.Multer.File[];
       contents?: Express.Multer.File[];
     },
+    @Request() req,
   ) {
-    return this.postsService.create(createPostDto, files);
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      throw new UnauthorizedException('User must be authenticated to create posts');
+    }
+    
+    return this.postsService.create(createPostDto, files, userId);
   }
 
   @Public()
@@ -56,20 +63,29 @@ export class PostsController {
   findAll(
     @Query('search') search?: string,
     @Query('filter') filter?: string,
+    @Query('userId') userId?: string,
     @Query('sort') sort: string = 'createdAt:DESC',
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
   ) {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
+    const userIdNumber = userId ? parseInt(userId, 10) : undefined;
 
     return this.postsService.findAll({
       search,
       filter,
+      userId: userIdNumber,
       sort,
       page: pageNumber,
       limit: limitNumber,
     });
+  }
+  
+  // Post like related endpoints - now using PostLikesService
+  @Get('liked')
+  async getLikedPosts(@Request() req) {
+    return this.postLikesService.getLikedPosts(req.user.id);
   }
 
   @Public()
@@ -107,12 +123,6 @@ export class PostsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.postsService.remove(+id);
-  }
-
-  // Post like related endpoints - now using PostLikesService
-  @Get('liked')
-  async getLikedPosts(@Request() req) {
-    return this.postLikesService.getLikedPosts(req.user.id);
   }
 
   @Post(':id/like')
