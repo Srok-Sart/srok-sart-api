@@ -8,9 +8,16 @@ export abstract class Base {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @CreateDateColumn({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  public createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @UpdateDateColumn({
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
+  public updatedAt: Date;
 }
