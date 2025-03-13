@@ -148,8 +148,13 @@ export class PostsService {
   }
 
   async findOne(id: number): Promise<Post> {
+    const postId = Number(id);
+    if (isNaN(postId)) {
+      throw new NotFoundException(`Invalid post ID: ${id}`);
+    }
+
     const post = await this.postRepository.findOne({
-      where: { id },
+      where: { id: postId },
       select: {
         id: true,
         title: true,

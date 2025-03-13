@@ -11,11 +11,6 @@ export class PostCompletion extends Base {
   @ManyToOne(() => User, (user) => user.completions)
   user: User;
 
-  @Column({
-    type: 'jsonb',
-    array: false,
-    default: () => "'[]'",
-    nullable: true,
-  })
-  materialSaved: Array<{ id: string }> = [];
+  @Column({ nullable: true })
+  completedAt: Date;
 }
