@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationResult } from 'src/interfaces/paginate-result.interface';
 import { Material } from 'src/materials/entities/material.entity';
-import { In, Repository } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
 import { FileUploadService } from '../services/file-upload.service';
-import { User } from '../users/entities/user.entity';
+import { PostMaterialsService } from '../services/post-material.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
@@ -12,10 +13,10 @@ import { Post } from './entities/post.entity';
 interface QueryParams {
   search?: string;
   filter?: string;
+  userId?: number;
   sort?: string;
   page: number;
   limit: number;
-  userId?: number;
 }
 
 @Injectable()
@@ -26,6 +27,7 @@ export class PostsService {
     @InjectRepository(Material)
     private materialRepository: Repository<Material>,
     private fileUploadService: FileUploadService,
+    private postMaterialsService: PostMaterialsService,
   ) {}
 
   async create(
@@ -49,39 +51,44 @@ export class PostsService {
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
-    const materials = await this.materialRepository.findBy({
-      id: In(createPostDto.materialIds),
-    });
 
-    if (materials.length !== createPostDto.materialIds.length) {
-      throw new NotFoundException('One or more materials not found');
-    }
+    // Parse materials if needed
+    const materials = Array.isArray(createPostDto.materials)
+      ? createPostDto.materials
+      : JSON.parse(createPostDto.materials as any);
 
     const postData = {
       ...createPostDto,
       thumbnailUrl,
       imageUrls,
       user,
-      userId,
       materials,
     };
 
     const post = this.postRepository.create(postData);
-    return await this.postRepository.save(post);
+    const savedPost = await this.postRepository.save(post);
+
+    // Add materials to the post
+    const postMaterials = await this.postMaterialsService.addMaterialsToPost(
+      savedPost.id,
+      materials,
+    );
+
+    return {
+      ...savedPost,
+      postMaterials,
+    };
   }
 
   async findAll({
     search,
     filter,
+    userId,
     sort,
     page,
     limit,
-    userId,
   }: QueryParams): Promise<PaginationResult<Post>> {
     const qb = this.postRepository.createQueryBuilder('post');
-
-    // Add the user relation to the query
-    qb.leftJoinAndSelect('post.user', 'user');
 
     // Global search on title and description fields.
     if (search) {
@@ -127,17 +134,47 @@ export class PostsService {
 
     // Execute the query and get results along with total count for pagination.
     const [data, total] = await qb.getManyAndCount();
-    return { data, total, page, limit };
+
+    // For each post, fetch the associated materials and append them as "postMaterials"
+    const postsWithMaterials = await Promise.all(
+      data.map(async (post) => {
+        const postMaterials =
+          await this.postMaterialsService.getMaterialsByPost(post.id);
+        return { ...post, postMaterials };
+      }),
+    );
+
+    return { data: postsWithMaterials, total, page, limit };
   }
 
   async findOne(id: number): Promise<Post> {
-    const post = await this.postRepository.findOneBy({ id });
+    const post = await this.postRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        estimatedTime: true,
+        postType: true,
+        thumbnailUrl: true,
+        imageUrls: true,
+        postDifficulty: true,
+        postStatus: true,
+      },
+    });
 
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
 
-    return post;
+    // Fetch post materials separately
+    const postMaterials =
+      await this.postMaterialsService.getMaterialsByPost(id);
+
+    return {
+      ...post,
+      postMaterials,
+    } as Post;
   }
 
   async update(
@@ -148,12 +185,14 @@ export class PostsService {
       contents?: Express.Multer.File[];
     },
   ) {
-    const post = await this.postRepository.findOne({ where: { id } });
+    const post = await this.postRepository.findOne({
+      where: { id },
+    });
+
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
 
-    // Upload new files if provided
     let thumbnailUrl = post.thumbnailUrl;
     if (files?.thumbnail?.length) {
       thumbnailUrl = await this.fileUploadService.saveFile(files.thumbnail[0]);
@@ -166,29 +205,41 @@ export class PostsService {
       );
     }
 
-    // Handle material updates if materialIds are provided
-    let materials = post.materials;
-
-    if (updatePostDto.materialIds && updatePostDto.materialIds.length > 0) {
-      materials = await this.materialRepository.findBy({
-        id: In(updatePostDto.materialIds),
-      });
-
-      if (materials.length !== updatePostDto.materialIds.length) {
-        throw new NotFoundException('One or more materials not found');
-      }
-    }
-
-    // Merge updates into existing post
-    const updatedPost = {
+    // Update post data first
+    const updatedPostData = {
       ...post,
       ...updatePostDto,
       thumbnailUrl,
       imageUrls,
-      materials,
     };
 
-    return await this.postRepository.save(updatedPost);
+    // Save the post updates
+    const updatedPost = await this.postRepository.save(updatedPostData);
+
+    // Handle material updates if provided
+    let postMaterials = await this.postMaterialsService.getMaterialsByPost(id);
+
+    if (
+      updatePostDto.materials &&
+      (Array.isArray(updatePostDto.materials) ||
+        typeof updatePostDto.materials === 'string')
+    ) {
+      // Parse materials if needed
+      const materials = Array.isArray(updatePostDto.materials)
+        ? updatePostDto.materials
+        : JSON.parse(updatePostDto.materials as any);
+
+      // Update post materials
+      postMaterials = await this.postMaterialsService.updatePostMaterials(
+        id,
+        materials,
+      );
+    }
+
+    return {
+      ...updatedPost,
+      postMaterials,
+    };
   }
 
   async remove(id: number) {
@@ -198,7 +249,11 @@ export class PostsService {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
 
-    return await this.postRepository.remove(post);
+    // Remove associated post materials
+    await this.postMaterialsService.removePostMaterials(id);
+
+    // Remove the post
+    return this.postRepository.remove(post);
   }
 
   async markAsCompleted(id: number) {

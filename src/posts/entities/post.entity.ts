@@ -1,19 +1,12 @@
 import { Base } from 'src/core/base.entity';
-import { Material } from 'src/materials/entities/material.entity';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { PostDifficulty } from '../enums/post-difficulty.enum';
 import { PostStatus } from '../enums/post-status.enum';
 import { PostType } from '../enums/post-type.enum';
 import { PostCompletion } from './post-completion.entity';
 import { PostLike } from './post-like.entity';
+import { PostMaterial } from './post-material.entity';
 
 @Entity('posts')
 export class Post extends Base {
@@ -69,7 +62,9 @@ export class Post extends Base {
   @OneToMany(() => PostCompletion, (postCompletion) => postCompletion.post)
   completions: PostCompletion[];
 
-  @ManyToMany(() => Material, (material) => material.posts, { eager: true })
-  @JoinTable()
-  materials: Material[];
+  @OneToMany(() => PostMaterial, (postMaterial) => postMaterial.post, {
+    cascade: true,
+  })
+  postMaterials: PostMaterial[];
+  totalWeight: number;
 }
