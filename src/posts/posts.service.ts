@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { PaginationResult } from 'src/interfaces/paginate-result.interface';
+import { Material } from 'src/materials/entities/material.entity';
+import { In, Repository } from 'typeorm';
 import { FileUploadService } from '../services/file-upload.service';
+import { User } from '../users/entities/user.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from './entities/post.entity';
-import { PaginationResult } from 'src/interfaces/paginate-result.interface';
-import { User } from '../users/entities/user.entity';
 
 interface QueryParams {
   search?: string;
@@ -22,6 +23,8 @@ export class PostsService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Material)
+    private materialRepository: Repository<Material>,
     private fileUploadService: FileUploadService,
   ) {}
 
@@ -46,6 +49,13 @@ export class PostsService {
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
+    const materials = await this.materialRepository.findBy({
+      id: In(createPostDto.materialIds),
+    });
+
+    if (materials.length !== createPostDto.materialIds.length) {
+      throw new NotFoundException('One or more materials not found');
+    }
 
     const postData = {
       ...createPostDto,
@@ -53,6 +63,7 @@ export class PostsService {
       imageUrls,
       user,
       userId,
+      materials,
     };
 
     const post = this.postRepository.create(postData);
@@ -155,12 +166,26 @@ export class PostsService {
       );
     }
 
+    // Handle material updates if materialIds are provided
+    let materials = post.materials;
+
+    if (updatePostDto.materialIds && updatePostDto.materialIds.length > 0) {
+      materials = await this.materialRepository.findBy({
+        id: In(updatePostDto.materialIds),
+      });
+
+      if (materials.length !== updatePostDto.materialIds.length) {
+        throw new NotFoundException('One or more materials not found');
+      }
+    }
+
     // Merge updates into existing post
     const updatedPost = {
       ...post,
       ...updatePostDto,
       thumbnailUrl,
       imageUrls,
+      materials,
     };
 
     return await this.postRepository.save(updatedPost);
