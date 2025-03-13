@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import databaseConfig from 'db.config';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
+import { CommentsModule } from './comments/comments.module';
+import { MaterialsModule } from './materials/materials.module';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
-import { MaterialsModule } from './materials/materials.module';
-import { CommentsModule } from './comments/comments.module';
-import databaseConfig from 'db.config';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import { BookmarksModule } from './bookmarks/bookmarks.module';
 
 @Module({
   imports: [

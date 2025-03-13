@@ -18,6 +18,10 @@ import {
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { Public } from 'src/auth/decorators/public.decorator';
+import {
+  MaterialSavedSummary,
+  MaterialTrackingService,
+} from 'src/posts/material-tracking.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostLikeResponseDto } from './dto/post-like-response.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -31,6 +35,7 @@ export class PostsController {
     private readonly postsService: PostsService,
     private readonly postLikesService: PostLikesService,
     private readonly postCompletionService: PostCompletionService,
+    private readonly materialTrackingService: MaterialTrackingService,
   ) {}
 
   @Post()
@@ -90,6 +95,11 @@ export class PostsController {
   @Get('liked')
   async getLikedPosts(@Request() req) {
     return this.postLikesService.getLikedPosts(req.user.id);
+  }
+
+  @Get('saved-materials')
+  async getTotalMaterialsSaved(): Promise<MaterialSavedSummary> {
+    return this.materialTrackingService.getTotalMaterialsSaved();
   }
 
   @Public()
@@ -158,7 +168,6 @@ export class PostsController {
 
   @Post(':id/complete')
   async markAsCompleted(@Param('id') id: string, @Request() req) {
-    console.log('req.user', req.user);
     const userId = req.user['id'];
     const postId = parseInt(id, 10);
 

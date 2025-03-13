@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MaterialsModule } from 'src/materials/materials.module';
+import { MaterialTrackingService } from 'src/posts/material-tracking.service';
 import { PostMaterialsService } from 'src/services/post-material.service';
 import { FileUploadService } from '../services/file-upload.service';
 import { User } from '../users/entities/user.entity';
@@ -31,6 +32,7 @@ import { PostsService } from './posts.service';
     FileUploadService,
     PostCompletionService,
     PostMaterialsService,
+    MaterialTrackingService,
   ],
 })
 export class PostsModule {}
