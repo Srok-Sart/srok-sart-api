@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
 } from 'class-validator';
 import { MaterialCategory } from '../enums/material-category.enum';
 import { MaterialUnit } from '../enums/material-unit.enum';
@@ -13,9 +14,10 @@ export class CreateMaterialDto {
   @IsNotEmpty()
   name: string;
 
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
   @IsNotEmpty()
-  weightPerUnit: string;
+  weightPerUnit: number;
 
   @IsNumber()
   @IsOptional()

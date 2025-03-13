@@ -1,16 +1,16 @@
-import { Column, Entity, ManyToMany } from 'typeorm';
+import { Base } from 'src/core/base.entity';
+import { PostMaterial } from 'src/posts/entities/post-material.entity';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { MaterialCategory } from '../enums/material-category.enum';
 import { MaterialUnit } from '../enums/material-unit.enum';
-import { Base } from 'src/core/base.entity';
-import { Post } from 'src/posts/entities/post.entity';
 
 @Entity('materials')
 export class Material extends Base {
   @Column()
   name: string;
 
-  @Column()
-  weightPerUnit: string;
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  weightPerUnit: number;
 
   @Column({ default: 0 })
   environmentalImpact: number;
@@ -29,6 +29,6 @@ export class Material extends Base {
   })
   unit: MaterialUnit;
 
-  @ManyToMany(() => Post, (post) => post.materials)
-  posts: Post[];
+  @OneToMany(() => PostMaterial, (postMaterial) => postMaterial.material)
+  postMaterials: PostMaterial[];
 }
