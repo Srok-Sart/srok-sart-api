@@ -1,5 +1,5 @@
-import { DataSource } from 'typeorm';
 import * as path from 'path';
+import { DataSource } from 'typeorm';
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -12,6 +12,9 @@ const AppDataSource = new DataSource({
   migrations: ['src/migrations/*-migration.ts'],
   migrationsRun: false,
   logging: true,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 export default AppDataSource;
