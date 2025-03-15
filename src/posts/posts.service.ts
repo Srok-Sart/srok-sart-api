@@ -17,6 +17,7 @@ interface QueryParams {
   sort?: string;
   page: number;
   limit: number;
+  includeUser: boolean;
 }
 
 @Injectable()
@@ -87,8 +88,18 @@ export class PostsService {
     sort,
     page,
     limit,
+    includeUser = true,
   }: QueryParams): Promise<PaginationResult<Post>> {
     const qb = this.postRepository.createQueryBuilder('post');
+
+    // Include user if needed
+    if (includeUser) {
+      qb.leftJoinAndSelect('post.user', 'user');
+      qb.addSelect([
+        'user.id', 
+        'user.username', 
+        'user.email']);
+    }
 
     // Global search on title and description fields.
     if (search) {
@@ -147,35 +158,54 @@ export class PostsService {
     return { data: postsWithMaterials, total, page, limit };
   }
 
-  async findOne(id: number): Promise<Post> {
+  async findOne(id: number, includeUser: boolean = true): Promise<Post> {
     const postId = Number(id);
     if (isNaN(postId)) {
       throw new NotFoundException(`Invalid post ID: ${id}`);
     }
-
-    const post = await this.postRepository.findOne({
-      where: { id: postId },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        estimatedTime: true,
-        postType: true,
-        thumbnailUrl: true,
-        imageUrls: true,
-        postDifficulty: true,
-        postStatus: true,
-      },
-    });
-
+  
+    // Create a query builder for more flexibility
+    const qb = this.postRepository.createQueryBuilder('post')
+      .where('post.id = :id', { id: postId })
+      .select([
+        'post.id',
+        'post.title',
+        'post.description',
+        'post.estimatedTime',
+        'post.postType',
+        'post.thumbnailUrl',
+        'post.imageUrls',
+        'post.postDifficulty',
+        'post.postStatus',
+        'post.completionCount',
+        'post.viewCount',
+        'post.likeCount',
+        'post.createdAt',
+        'post.updatedAt'
+      ]);
+    
+    // Include user information if requested
+    if (includeUser) {
+      qb.leftJoinAndSelect('post.user', 'user')
+        .addSelect([
+          'user.id',
+          'user.username',
+          'user.email',
+          'user.profileImageUrl'
+          // Add other user fields you need
+        ]);
+    }
+  
+    const post = await qb.getOne();
+  
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
-
+  
     // Fetch post materials separately
     const postMaterials =
       await this.postMaterialsService.getMaterialsByPost(id);
-
+  
     return {
       ...post,
       postMaterials,

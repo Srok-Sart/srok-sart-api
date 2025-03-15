@@ -76,10 +76,12 @@ export class PostsController {
     @Query('sort') sort: string = 'createdAt:DESC',
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
+    @Query('includeUser') includeUser: string = 'true',
   ) {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
     const userIdNumber = userId ? parseInt(userId, 10) : undefined;
+    const shouldIncludeUser = includeUser !== 'false';
 
     return this.postsService.findAll({
       search,
@@ -88,6 +90,7 @@ export class PostsController {
       sort,
       page: pageNumber,
       limit: limitNumber,
+      includeUser: shouldIncludeUser,
     });
   }
 
@@ -104,8 +107,12 @@ export class PostsController {
 
   @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
+  findOne(
+    @Param('id') id: string,
+    @Query('includeUser') includeUser: string = 'true',
+  ) {
+    const shouldIncludeUser = includeUser !== 'false';
+    return this.postsService.findOne(+id, shouldIncludeUser);
   }
 
   @Public()
