@@ -48,16 +48,10 @@ export class PostsController {
       {
         storage: memoryStorage(),
         limits: {
-          fileSize: 5 * 1024 * 1024, // 5MB in bytes
+          fileSize: 5 * 1024 * 1024, // 5MB
           files: 6, // Max 6 files total (1 thumbnail + 5 contents)
         },
-        fileFilter: (req, file, callback) => {
-          // Check if file is an image
-          if (!file.mimetype.match(/^image\/(jpg|jpeg|png|gif|webp)$/)) {
-            return callback(new Error('Only image files are allowed!'), false);
-          }
-          callback(null, true);
-        },
+        // Remove the fileFilter since FileUploadService now handles the validation
       },
     ),
   )
@@ -141,16 +135,10 @@ export class PostsController {
       {
         storage: memoryStorage(),
         limits: {
-          fileSize: 5 * 1024 * 1024, // 5MB in bytes
+          fileSize: 5 * 1024 * 1024, // 5MB
           files: 6, // Max 6 files total (1 thumbnail + 5 contents)
         },
-        fileFilter: (req, file, callback) => {
-          // Check if file is an image
-          if (!file.mimetype.match(/^image\/(jpg|jpeg|png|gif|webp)$/)) {
-            return callback(new Error('Only image files are allowed!'), false);
-          }
-          callback(null, true);
-        },
+        // Remove the fileFilter since FileUploadService now handles the validation
       },
     ),
   )
