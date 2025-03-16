@@ -22,7 +22,7 @@ export class Post extends Base {
   @Column('text', { array: true, default: [] })
   imageUrls: string[];
 
-  @Column()
+  @Column({ nullable: true })
   thumbnailUrl: string;
 
   @Column({ default: 0 })

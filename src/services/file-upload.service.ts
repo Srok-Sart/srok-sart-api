@@ -15,7 +15,7 @@ export class FileUploadService {
   private readonly logger = new Logger(FileUploadService.name);
   private uploadDir = join(process.cwd(), 'uploads');
   private readonly maxFileSize = 5 * 1024 * 1024; // 5MB
-  private readonly allowedFileTypes = [
+  private readonly allowedImageTypes = [
     '.jpg',
     '.jpeg',
     '.png',
@@ -24,6 +24,14 @@ export class FileUploadService {
     '.pdf',
     '.doc',
     '.docx',
+  ];
+  private readonly allowedVideoTypes = [
+    '.mp4',
+    '.webm',
+    '.ogg',
+    '.mov',
+    '.mkv',
+    '.avi',
   ];
 
   /**
@@ -60,12 +68,19 @@ export class FileUploadService {
 
     // Check file type
     const fileExt = extname(file.originalname).toLowerCase();
-    if (!this.allowedFileTypes.includes(fileExt)) {
+    const isImage = this.allowedImageTypes.includes(fileExt);
+    const isVideo = this.allowedVideoTypes.includes(fileExt);
+    
+    // Accept both image and video types
+    if (!isImage && !isVideo) {
       this.logger.warn(
         `Unsupported file type: ${fileExt} for file ${file.originalname}`,
       );
       throw new UnsupportedMediaTypeException(
-        `File type ${fileExt} is not supported. Allowed types: ${this.allowedFileTypes.join(', ')}`,
+        `File type ${fileExt} is not supported. Allowed types: ${[
+          ...this.allowedImageTypes, 
+          ...this.allowedVideoTypes
+        ].join(', ')}`,
       );
     }
   }
