@@ -14,10 +14,12 @@ import {
   UnauthorizedException,
   UploadedFiles,
   UseInterceptors,
+  UseFilters,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { Public } from 'src/auth/decorators/public.decorator';
+// import { FileUploadExceptionFilter } from 'src/common/filters/file-upload.filter';
 import {
   MaterialSavedSummary,
   MaterialTrackingService,
@@ -39,11 +41,23 @@ export class PostsController {
   ) {}
 
   @Post()
+  // @UseFilters(FileUploadExceptionFilter)
   @UseInterceptors(
     FileFieldsInterceptor(
-      [{ name: 'thumbnail', maxCount: 1 }, { name: 'contents' }],
+      [{ name: 'thumbnail', maxCount: 1 }, { name: 'contents', maxCount: 5 }],
       {
         storage: memoryStorage(),
+        limits: {
+          fileSize: 5 * 1024 * 1024, // 5MB in bytes
+          files: 6, // Max 6 files total (1 thumbnail + 5 contents)
+        },
+        fileFilter: (req, file, callback) => {
+          // Check if file is an image
+          if (!file.mimetype.match(/^image\/(jpg|jpeg|png|gif|webp)$/)) {
+            return callback(new Error('Only image files are allowed!'), false);
+          }
+          callback(null, true);
+        },
       },
     ),
   )
@@ -117,6 +131,7 @@ export class PostsController {
 
   @Public()
   @Patch(':id')
+  // @UseFilters(FileUploadExceptionFilter)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -125,6 +140,17 @@ export class PostsController {
       ],
       {
         storage: memoryStorage(),
+        limits: {
+          fileSize: 5 * 1024 * 1024, // 5MB in bytes
+          files: 6, // Max 6 files total (1 thumbnail + 5 contents)
+        },
+        fileFilter: (req, file, callback) => {
+          // Check if file is an image
+          if (!file.mimetype.match(/^image\/(jpg|jpeg|png|gif|webp)$/)) {
+            return callback(new Error('Only image files are allowed!'), false);
+          }
+          callback(null, true);
+        },
       },
     ),
   )

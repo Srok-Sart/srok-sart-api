@@ -12,9 +12,9 @@ const AppDataSource = new DataSource({
   migrations: ['src/migrations/*-migration.ts'],
   migrationsRun: false,
   logging: true,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
 });
 
 export default AppDataSource;

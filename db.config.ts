@@ -13,8 +13,8 @@ export default registerAs(
     database: process.env.DB_NAME || 'srok_sart',
     entities: [path.join(__dirname, '/**/*.entity{.ts,.js}')],
     synchronize: process.env.DB_SYNC === 'true' || false,
-    ssl: {
-      rejectUnauthorized: false, // Allows self-signed certificates
-    },
+    // ssl: {
+    //   rejectUnauthorized: false, // Allows self-signed certificates
+    // },
   }),
 );
