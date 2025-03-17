@@ -219,6 +219,9 @@ export class MaterialTrackingService {
 
         if (quantity <= 0) continue;
 
+        // Add quantity to totalSavedItems directly regardless of unit type
+        totalSavedItems += quantity;
+        
         totalMaterialCount += quantity;
 
         const weightPerUnit = parseFloat(
@@ -238,8 +241,6 @@ export class MaterialTrackingService {
           totalSavedWeight += standardAmount;
         } else if (isVolume) {
           totalSavedVolume += standardAmount;
-        } else {
-          totalSavedItems += quantity;
         }
 
         // Update material breakdown
