@@ -1,17 +1,4 @@
 entity: Post
 processor: ./processors/post-processor
 items:
-  post{1..30}:
-    title: '{{lorem.sentence}}'
-    description: '{{lorem.paragraphs}}'
-    estimatedTime: '{{datatype.number({ min: 5, max: 120 })}} minutes'
-    # imageUrls and thumbnailUrl will be set by the processor
-    viewCount: '{{datatype.number({ min: 0, max: 1000 })}}'
-    completionCount: '{{datatype.number({ min: 0, max: 200 })}}'
-    likeCount: '{{datatype.number({ min: 0, max: 500 })}}'
-    postType: '{{random.arrayElement(["IMAGE", "VIDEO", "YOUTUBE_URL"])}}'
-    postDifficulty: '{{random.arrayElement(["EASY", "MEDIUM", "HARD"])}}'
-    postStatus: '{{random.arrayElement(["PENDING", "PUBLISH", "REJECTED"])}}'
-    user: '@user*'
-    createdAt: '{{date.past}}'
-    updatedAt: '{{date.recent}}'
+  post{1..30}: ~
