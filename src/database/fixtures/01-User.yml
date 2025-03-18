@@ -1,0 +1,19 @@
+entity: User
+items:
+  admin:
+    firstName: 'Admin'
+    lastName: 'User'
+    username: 'admin'
+    email: 'admin@example.com'
+    password: 'password123'
+    bio: 'System administrator'
+    role: 'ADMIN'
+
+  user{1..10}:
+    firstName: '{{name.firstName}}'
+    lastName: '{{name.lastName}}'
+    username: '{{internet.userName}}'
+    email: '{{internet.email}}'
+    password: 'password123'
+    bio: '{{lorem.sentence}}'
+    role: 'USER'

@@ -1,0 +1,6 @@
+entity: PostCompletion
+items:
+  post_completion{1..80}:
+    post: '@post*'
+    user: '@user*'
+    completedAt: '{{date.recent}}' 

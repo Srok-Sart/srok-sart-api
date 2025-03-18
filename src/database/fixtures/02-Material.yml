@@ -1,0 +1,9 @@
+entity: Material
+processor: ./processors/material-processor
+items:
+  material{1..30}:
+    name: '{{commerce.productMaterial}} {{commerce.productName}}'
+    weightPerUnit: '{{datatype.float({ min: 0.1, max: 10, precision: 0.01 })}}'
+    environmentalImpact: '{{datatype.number({ min: 1, max: 10 })}}'
+    category: '{{random.arrayElement(["PLASTIC", "PAPER", "METAL", "GLASS", "TEXTILE", "ORGANIC", "ELECTRONIC", "BATTERY", "OTHER"])}}'
+    unit: '{{random.arrayElement(["KG", "G", "L", "ML", "PIECE", "PACK", "BOTTLE", "SPOON"])}}' 

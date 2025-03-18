@@ -1,0 +1,6 @@
+entity: PostLike
+items:
+  post_like{1..100}:
+    post: '@post*'
+    user: '@user*'
+    createdAt: '{{date.recent}}' 
