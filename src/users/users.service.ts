@@ -14,8 +14,13 @@ export class UsersService {
   constructor(@InjectRepository(User) private usersRepo: Repository<User>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    // Set default profile image if not provided
+    if (!createUserDto.profileImageUrl) {
+      createUserDto.profileImageUrl = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/person-fill.svg';
+    }
+    
     const user = this.usersRepo.create(createUserDto);
-
+  
     try {
       return await this.usersRepo.save(user);
     } catch (error) {
