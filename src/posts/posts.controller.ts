@@ -14,16 +14,10 @@ import {
   UnauthorizedException,
   UploadedFiles,
   UseInterceptors,
-  UseFilters,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { Public } from 'src/auth/decorators/public.decorator';
-// import { FileUploadExceptionFilter } from 'src/common/filters/file-upload.filter';
-import {
-  MaterialSavedSummary,
-  MaterialTrackingService,
-} from 'src/posts/material-tracking.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { PostLikeResponseDto } from './dto/post-like-response.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -37,14 +31,16 @@ export class PostsController {
     private readonly postsService: PostsService,
     private readonly postLikesService: PostLikesService,
     private readonly postCompletionService: PostCompletionService,
-    private readonly materialTrackingService: MaterialTrackingService,
   ) {}
 
   @Post()
   // @UseFilters(FileUploadExceptionFilter)
   @UseInterceptors(
     FileFieldsInterceptor(
-      [{ name: 'thumbnail', maxCount: 1 }, { name: 'contents', maxCount: 5 }],
+      [
+        { name: 'thumbnail', maxCount: 1 },
+        { name: 'contents', maxCount: 5 },
+      ],
       {
         storage: memoryStorage(),
         limits: {
@@ -106,11 +102,6 @@ export class PostsController {
   @Get('liked')
   async getLikedPosts(@Request() req) {
     return this.postLikesService.getLikedPosts(req.user.id);
-  }
-
-  @Get('saved-materials')
-  async getTotalMaterialsSaved(): Promise<MaterialSavedSummary> {
-    return this.materialTrackingService.getTotalMaterialsSaved();
   }
 
   @Public()

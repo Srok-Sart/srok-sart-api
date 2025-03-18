@@ -12,6 +12,7 @@ import { CommentsModule } from './comments/comments.module';
 import { MaterialsModule } from './materials/materials.module';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
+import { MaterialTrackingModule } from './material-tracking/material-tracking.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UsersModule } from './users/users.module';
     MaterialsModule,
     CommentsModule,
     BookmarksModule,
+    MaterialTrackingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
