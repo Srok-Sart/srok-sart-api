@@ -1,14 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MaterialCategory } from 'src/materials/enums/material-category.enum';
 import { MaterialUnit } from 'src/materials/enums/material-unit.enum';
-import { PostMaterialsService } from 'src/services/post-material.service';
+import { PostCompletion } from 'src/posts/entities/post-completion.entity';
+import { PostMaterial } from 'src/posts/entities/post-material.entity';
 import { In, Repository } from 'typeorm';
-import { Material } from '../materials/entities/material.entity';
-import { User } from '../users/entities/user.entity';
-import { PostCompletion } from './entities/post-completion.entity';
-import { PostMaterial } from './entities/post-material.entity';
-import { Post } from './entities/post.entity';
 
 export interface MaterialBreakdownItem {
   id: number;
@@ -36,59 +32,11 @@ export interface MaterialSavedSummary {
 @Injectable()
 export class MaterialTrackingService {
   constructor(
-    @InjectRepository(Post)
-    private postRepository: Repository<Post>,
     @InjectRepository(PostCompletion)
     private postCompletionRepository: Repository<PostCompletion>,
     @InjectRepository(PostMaterial)
     private postMaterialRepository: Repository<PostMaterial>,
-    @InjectRepository(Material)
-    private materialRepository: Repository<Material>,
-    private readonly postMaterialsService: PostMaterialsService,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
   ) {}
-
-  async markPostAsCompleted(postId: number, userId: number): Promise<Post> {
-    // Find the post with all its materials and their details
-    const post = await this.postRepository.findOne({
-      where: { id: postId },
-      relations: ['postMaterials', 'postMaterials.material'],
-    });
-
-    if (!post) {
-      throw new NotFoundException(`Post with ID ${postId} not found`);
-    }
-
-    const user = await this.userRepository.findOneBy({ id: userId });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-
-    // Check if the user has already completed this post
-    const existingCompletion = await this.postCompletionRepository.findOne({
-      where: { post: { id: postId }, user: { id: userId } },
-    });
-
-    if (!existingCompletion) {
-      // Create a new completion record
-      const completion = this.postCompletionRepository.create({
-        post,
-        user,
-        completedAt: new Date(),
-      });
-      await this.postCompletionRepository.save(completion);
-
-      // Increment the completion count on the post
-      await this.postRepository.increment({ id: postId }, 'completionCount', 1);
-    }
-
-    // Return the updated post with the latest completion count
-    return await this.postRepository.findOne({
-      where: { id: postId },
-      relations: ['postMaterials', 'postMaterials.material'],
-    });
-  }
 
   async getMaterialsSavedByUser(userId: number): Promise<MaterialSavedSummary> {
     // Find all completed posts by the user with their completion timestamps
@@ -221,7 +169,7 @@ export class MaterialTrackingService {
 
         // Add quantity to totalSavedItems directly regardless of unit type
         totalSavedItems += quantity;
-        
+
         totalMaterialCount += quantity;
 
         const weightPerUnit = parseFloat(

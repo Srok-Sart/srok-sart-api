@@ -70,7 +70,7 @@ export class FileUploadService {
     const fileExt = extname(file.originalname).toLowerCase();
     const isImage = this.allowedImageTypes.includes(fileExt);
     const isVideo = this.allowedVideoTypes.includes(fileExt);
-    
+
     // Accept both image and video types
     if (!isImage && !isVideo) {
       this.logger.warn(
@@ -78,8 +78,8 @@ export class FileUploadService {
       );
       throw new UnsupportedMediaTypeException(
         `File type ${fileExt} is not supported. Allowed types: ${[
-          ...this.allowedImageTypes, 
-          ...this.allowedVideoTypes
+          ...this.allowedImageTypes,
+          ...this.allowedVideoTypes,
         ].join(', ')}`,
       );
     }

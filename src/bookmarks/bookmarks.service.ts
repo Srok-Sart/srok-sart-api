@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException, Request } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BookmarkCollection } from './entities/bookmark-collection.entity';
-import { PostBookmark } from './entities/post-bookmark.entity';
 import { Post } from '../posts/entities/post.entity';
 import { CreateBookmarkCollectionDto } from './dto/create-bookmark-collection.dto';
-import { UpdateBookmarkCollectionDto } from './dto/update-bookmark-collection.dto';
 import { CreatePostBookmarkDto } from './dto/create-post-bookmark.dto';
+import { UpdateBookmarkCollectionDto } from './dto/update-bookmark-collection.dto';
 import { UpdatePostBookmarkDto } from './dto/update-post-bookmark.dto';
+import { BookmarkCollection } from './entities/bookmark-collection.entity';
+import { PostBookmark } from './entities/post-bookmark.entity';
 
 @Injectable()
 export class BookmarksService {
@@ -51,10 +51,10 @@ export class BookmarksService {
     updateDto: UpdateBookmarkCollectionDto,
   ): Promise<BookmarkCollection> {
     const collection = await this.findOneCollection(id);
-  
+
     // Merge the updateDto with the existing collection
     this.bookmarkCollectionRepository.merge(collection, updateDto);
-  
+
     // Save the updated collection
     return this.bookmarkCollectionRepository.save(collection);
   }
@@ -116,7 +116,7 @@ export class BookmarksService {
       where: { collection: { id: collectionId } },
       relations: ['post'], // Include the post relation
     });
-  
+
     // Extract and return the posts
     return postBookmarks.map((bookmark) => bookmark.post);
   }
@@ -151,7 +151,7 @@ export class BookmarksService {
     const postBookmarks = await this.postBookmarkRepository.find({
       relations: ['collection', 'post'],
     });
-  
+
     const groupedByCollection = postBookmarks.reduce((acc, bookmark) => {
       const collectionId = bookmark.collection.id;
       if (!acc[collectionId]) {
@@ -165,13 +165,17 @@ export class BookmarksService {
       }
       return acc;
     }, {});
-  
+
     return Object.values(groupedByCollection);
   }
 
-  async unsavePostFromCollection(collectionId: number, postId: number): Promise<void> {
-    await this.postBookmarkRepository.delete({ collection: { id: collectionId }, post: { id: postId } });
+  async unsavePostFromCollection(
+    collectionId: number,
+    postId: number,
+  ): Promise<void> {
+    await this.postBookmarkRepository.delete({
+      collection: { id: collectionId },
+      post: { id: postId },
+    });
   }
 }
-
-
