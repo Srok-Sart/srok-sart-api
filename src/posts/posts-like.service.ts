@@ -24,8 +24,9 @@ export class PostLikesService {
     const likes = await this.postLikeRepository.find({
       where: { user: { id: userId } },
       relations: ['post'],
+      order: { createdAt: 'ASC' },
     });
-
+  
     return likes.map((like) => like.post.id);
   }
 
