@@ -2,4 +2,6 @@ entity: PostMaterial
 processor: ./processors/post-material-processor
 items:
   post_material{1..30}: 
+      post: '@post*'
+      material: '@material*'
       quantity: 1

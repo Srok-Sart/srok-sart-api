@@ -1,4 +1,5 @@
 entity: Post
 processor: ./processors/post-processor
 items:
-  post{1..30}: ~
+  post{1..30}: 
+    user: '@user*'
