@@ -8,6 +8,7 @@ import {
   Delete,
   Request,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { BookmarksService } from './bookmarks.service';
 import { CreateBookmarkCollectionDto } from './dto/create-bookmark-collection.dto';
@@ -20,103 +21,211 @@ import { UpdatePostBookmarkDto } from './dto/update-post-bookmark.dto';
 export class BookmarksController {
   constructor(private readonly bookmarksService: BookmarksService) {}
 
-  @Public()
   @Post('collections')
-  createCollection(
+  async createCollection(
     @Body() createDto: CreateBookmarkCollectionDto,
     @Request() req,
   ) {
-    return this.bookmarksService.createCollection(createDto, req);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to create bookmark collections',
+      );
+    }
+
+    return this.bookmarksService.createCollection(createDto, userId);
   }
 
-  @Public()
   @Get('collections')
-  findAllCollections() {
-    return this.bookmarksService.findAllCollections();
+  findAllCollections(@Request() req) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to view bookmark collections',
+      );
+    }
+
+    return this.bookmarksService.findAllCollections(userId);
   }
 
-  @Public()
   @Get('collections/:id')
-  findOneCollection(@Param('id') id: string) {
-    return this.bookmarksService.findOneCollection(+id);
+  findOneCollection(@Param('id') id: string, @Request() req) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to view bookmark collections',
+      );
+    }
+
+    return this.bookmarksService.findOneCollection(+id, userId);
   }
 
-  @Public()
   @Put('collections/:id')
   async updateCollection(
     @Param('id') id: string,
     @Body() updateDto: UpdateBookmarkCollectionDto,
+    @Request() req,
   ) {
-    return this.bookmarksService.updateCollection(+id, updateDto);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to update bookmark collections',
+      );
+    }
+
+    return this.bookmarksService.updateCollection(+id, updateDto, userId);
   }
 
-  @Public()
   @Delete('collections/:id')
-  removeCollection(@Param('id') id: string) {
-    return this.bookmarksService.removeCollection(+id);
+  async removeCollection(@Param('id') id: string, @Request() req) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to delete bookmark collections',
+      );
+    }
+
+    await this.bookmarksService.removeCollection(+id, userId);
     return { message: 'Collection deleted successfully' };
   }
 
-  // Post Bookmark Endpoints
-  @Public()
   @Post('post-bookmarks')
-  createPostBookmark(@Body() createDto: CreatePostBookmarkDto) {
-    return this.bookmarksService.createPostBookmark(createDto);
+  async createPostBookmark(
+    @Body() createDto: CreatePostBookmarkDto,
+    @Request() req,
+  ) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to create post bookmarks',
+      );
+    }
+
+    return this.bookmarksService.createPostBookmark(createDto, userId);
   }
 
-  @Public()
   @Get('post-bookmarks')
-  findAllPostBookmarks() {
-    return this.bookmarksService.findAllPostBookmarks();
+  async findAllPostBookmarks(@Request() req) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to view post bookmarks',
+      );
+    }
+
+    return this.bookmarksService.findAllPostBookmarks(userId);
   }
 
-  @Public()
   @Get('collections/:collectionId/posts')
-  async findPostsInCollection(@Param('collectionId') collectionId: string) {
-    const parsedCollectionId = +collectionId; // Convert to number
+  async findPostsInCollection(
+    @Param('collectionId') collectionId: string,
+    @Request() req,
+  ) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to view posts in a collection',
+      );
+    }
+
+    const parsedCollectionId = +collectionId;
     if (isNaN(parsedCollectionId)) {
       throw new BadRequestException('Invalid collection ID');
     }
-    return this.bookmarksService.findPostsInCollection(parsedCollectionId);
+
+    return this.bookmarksService.findPostsInCollection(
+      parsedCollectionId,
+      userId,
+    );
   }
 
-  @Public()
   @Get('post-bookmarks/grouped-by-collection')
-  async findAllPostBookmarksGroupedByCollection() {
-    return this.bookmarksService.findAllPostBookmarksGroupedByCollection();
+  async findAllPostBookmarksGroupedByCollection(@Request() req) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to view post bookmarks grouped by collection',
+      );
+    }
+
+    return this.bookmarksService.findAllPostBookmarksGroupedByCollection(userId);
   }
 
-  @Public()
   @Get('post-bookmarks/:id')
-  findOnePostBookmark(@Param('id') id: string) {
-    const parsedId = +id; // Convert the id to a number
+  async findOnePostBookmark(@Param('id') id: string, @Request() req) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to view a post bookmark',
+      );
+    }
+
+    const parsedId = +id;
     if (isNaN(parsedId)) {
       throw new BadRequestException('Invalid post bookmark ID');
     }
-    return this.bookmarksService.findOnePostBookmark(parsedId);
+
+    return this.bookmarksService.findOnePostBookmark(parsedId, userId);
   }
 
-  @Public()
   @Put('post-bookmarks/:id')
-  updatePostBookmark(
+  async updatePostBookmark(
     @Param('id') id: string,
     @Body() updateDto: UpdatePostBookmarkDto,
+    @Request() req,
   ) {
-    return this.bookmarksService.updatePostBookmark(+id, updateDto);
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to update a post bookmark',
+      );
+    }
+
+    return this.bookmarksService.updatePostBookmark(+id, updateDto, userId);
   }
 
-  @Public()
   @Delete('post-bookmarks/:id')
-  removePostBookmark(@Param('id') id: string) {
-    return this.bookmarksService.removePostBookmark(+id);
+  async removePostBookmark(@Param('id') id: string, @Request() req) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to delete a post bookmark',
+      );
+    }
+
+    return this.bookmarksService.removePostBookmark(+id, userId);
   }
 
-  @Public()
   @Delete('post-bookmarks')
   async unsavePostFromCollection(
     @Body() body: { collectionId: number; postId: number },
+    @Request() req,
   ) {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedException(
+        'User must be authenticated to unsave a post from a collection',
+      );
+    }
+
     const { collectionId, postId } = body;
-    return this.bookmarksService.unsavePostFromCollection(collectionId, postId);
+    return this.bookmarksService.unsavePostFromCollection(
+      collectionId,
+      postId,
+      userId,
+    );
   }
 }
