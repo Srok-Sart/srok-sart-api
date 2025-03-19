@@ -1,0 +1,93 @@
+entity: User
+processor: ./processors/user-processor
+items:
+
+  user1:
+    firstName: 'John'
+    lastName: 'Doe'
+    username: 'johndoe'
+    email: 'john@example.com'
+    password: 'password123'
+    bio: 'Regular user account'
+    role: 'USER'
+    
+  user2:
+    firstName: 'Jane'
+    lastName: 'Smith'
+    username: 'janesmith'
+    email: 'jane@example.com'
+    password: 'password123'
+    bio: 'Second user account'
+    role: 'USER'
+
+  user3:
+    firstName: 'Bob'
+    lastName: 'Johnson'
+    username: 'bjohnson'
+    email: 'bob@example.com'
+    password: 'password123'
+    bio: 'Third user account'
+    role: 'USER'
+
+  user4:
+    firstName: 'Alice'
+    lastName: 'Williams'
+    username: 'alicew'
+    email: 'alice@example.com'
+    password: 'password123'
+    bio: 'Fourth user account'
+    role: 'USER'
+
+  user5:
+    firstName: 'Charlie'
+    lastName: 'Brown'
+    username: 'charliebrown'
+    email: 'charlie@example.com'
+    password: 'password123'
+    bio: 'Fifth user account'
+    role: 'USER'
+
+  user6:
+    firstName: 'Eve'
+    lastName: 'Davis'
+    username: 'evedavis'
+    email: 'eve@example.com'
+    password: 'password123'
+    bio: 'Sixth user account'
+    role: 'USER'
+
+  user7:
+    firstName: 'Frank'
+    lastName: 'Miller'
+    username: 'frankmiller'
+    email: 'frank@example.com'
+    password: 'password123'
+    bio: 'Seventh user account'
+    role: 'USER'
+
+  user8:
+    firstName: 'Grace'
+    lastName: 'Wilson'
+    username: 'gracewilson'
+    email: 'grace@example.com'
+    password: 'password123'
+    bio: 'Eighth user account'
+    role: 'USER'
+
+  user9:
+    firstName: 'Henry'
+    lastName: 'Moore'
+    username: 'henrymoore'
+    email: 'henry@example.com'
+    password: 'password123'
+    bio: 'Ninth user account'
+    role: 'USER'
+
+  user10:
+    firstName: 'Ivy'
+    lastName: 'Taylor'
+    username: 'ivytaylor'
+    email: 'ivy@example.com'
+    password: 'password123'
+    bio: 'Tenth user account'
+    role: 'USER'

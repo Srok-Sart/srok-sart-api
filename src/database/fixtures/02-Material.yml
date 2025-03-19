@@ -1,0 +1,4 @@
+entity: Material
+processor: ./processors/material-processor
+items:
+  material{1..30}: ~

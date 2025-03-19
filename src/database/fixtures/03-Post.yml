@@ -1,0 +1,4 @@
+entity: Post
+processor: ./processors/post-processor
+items:
+  post{1..30}: ~
