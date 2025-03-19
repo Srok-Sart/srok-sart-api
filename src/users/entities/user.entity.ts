@@ -49,11 +49,14 @@ export class User {
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
 
-  @OneToMany(
-    () => BookmarkCollection,
-    (bookmarkCollection) => bookmarkCollection._user,
-    { eager: true },
-  )
+  // @OneToMany(
+  //   () => BookmarkCollection,
+  //   (bookmarkCollection) => bookmarkCollection._user,
+  //   { eager: true },
+  // )
+  // collections: BookmarkCollection[];
+
+  @OneToMany(() => BookmarkCollection, (collection) => collection._user)
   collections: BookmarkCollection[];
 
   @OneToMany(() => PostCompletion, (postCompletion) => postCompletion.post)
