@@ -1,33 +1,42 @@
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectRepository(User) private usersRepo: Repository<User>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    console.log(createUserDto);
     // Set default profile image if not provided
     if (!createUserDto.profileImageUrl) {
-      createUserDto.profileImageUrl = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/person-fill.svg';
+      createUserDto.profileImageUrl =
+        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/person-fill.svg';
     }
-    
+
+    // Check if a user with the same email or username already exists
+    const existingUser = await this.usersRepo.findOne({
+      where: [
+        { email: createUserDto.email },
+        { username: createUserDto.username },
+      ],
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Username or email already exists.');
+    }
+
     const user = this.usersRepo.create(createUserDto);
-  
-    try {
-      return await this.usersRepo.save(user);
-    } catch (error) {
-      throw new InternalServerErrorException(
-        `Failed to create user. ${error.message}`,
-      );
-    }
+
+    return await this.usersRepo.save(user);
   }
 
   async findAll(): Promise<User[]> {

@@ -65,6 +65,5 @@ export class User {
   @BeforeInsert()
   async hashPassword() {
     this.password = await argon2.hash(this.password);
-    console.log(this.password);
   }
 }
