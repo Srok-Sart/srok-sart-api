@@ -95,10 +95,7 @@ export class PostsService {
     // Include user if needed
     if (includeUser) {
       qb.leftJoinAndSelect('post.user', 'user');
-      qb.addSelect([
-        'user.id', 
-        'user.username', 
-        'user.email']);
+      qb.addSelect(['user.id', 'user.username', 'user.email']);
     }
 
     // Global search on title and description fields.
@@ -163,9 +160,10 @@ export class PostsService {
     if (isNaN(postId)) {
       throw new NotFoundException(`Invalid post ID: ${id}`);
     }
-  
+
     // Create a query builder for more flexibility
-    const qb = this.postRepository.createQueryBuilder('post')
+    const qb = this.postRepository
+      .createQueryBuilder('post')
       .where('post.id = :id', { id: postId })
       .select([
         'post.id',
@@ -181,31 +179,30 @@ export class PostsService {
         'post.viewCount',
         'post.likeCount',
         'post.createdAt',
-        'post.updatedAt'
+        'post.updatedAt',
       ]);
-    
+
     // Include user information if requested
     if (includeUser) {
-      qb.leftJoinAndSelect('post.user', 'user')
-        .addSelect([
-          'user.id',
-          'user.username',
-          'user.email',
-          'user.profileImageUrl'
-          // Add other user fields you need
-        ]);
+      qb.leftJoinAndSelect('post.user', 'user').addSelect([
+        'user.id',
+        'user.username',
+        'user.email',
+        'user.profileImageUrl',
+        // Add other user fields you need
+      ]);
     }
-  
+
     const post = await qb.getOne();
-  
+
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
-  
+
     // Fetch post materials separately
     const postMaterials =
       await this.postMaterialsService.getMaterialsByPost(id);
-  
+
     return {
       ...post,
       postMaterials,
