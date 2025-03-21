@@ -77,7 +77,7 @@ export class PostsController {
     @Query('search') search?: string,
     @Query('filter') filter?: string,
     @Query('userId') userId?: string,
-    @Query('sort') sort: string = 'id:ASC',
+    @Query('sort') sort: string = 'createdAt:DESC',
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
     @Query('includeUser') includeUser: string = 'true',
