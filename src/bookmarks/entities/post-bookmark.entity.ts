@@ -8,7 +8,7 @@ export class PostBookmark extends Base {
   @ManyToOne(() => BookmarkCollection, (collection) => collection.postBookmarks)
   collection: BookmarkCollection;
 
-  @ManyToOne(() => Post)
+  @ManyToOne(() => Post, { onDelete: 'CASCADE' })
   post: Post;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
